@@ -31,6 +31,7 @@
         .btn-ai { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: 1px solid rgba(255,255,255,0.2); }
         .btn-success { background: #10b981; color: white; }
         .btn-danger { background: #ef4444; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
         
         /* Search Bar Area */
         .search-wrapper { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -82,7 +83,7 @@
     <!-- VIEW 2: Submission Form -->
     <div id="view-submit" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3>Submit a Workaround</h3>
+            <h3 id="formTitle">Submit a Workaround</h3>
             <button class="btn btn-ai" onclick="aiPolish()" id="polishBtn">
                 <i class="ph ph-magic-wand"></i> AI Polish
             </button>
@@ -99,7 +100,10 @@
             <label><strong>The Fix (Step-by-step)</strong></label>
             <textarea id="inSteps" rows="5" placeholder="1. Clear cache on iPad&#10;2. Sign out everywhere..."></textarea>
             
-            <button class="btn btn-primary" onclick="submitEntry()" style="width:100%; justify-content:center; margin-top:10px;">Submit for Review</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-secondary hidden" id="cancelEditBtn" onclick="cancelEdit()" style="flex:1;">Cancel</button>
+                <button class="btn btn-primary" id="submitBtn" onclick="submitEntry()" style="flex:2; justify-content:center;">Submit for Review</button>
+            </div>
         </div>
     </div>
 
@@ -146,6 +150,7 @@
 
     let localWorkarounds = []; 
     let currentUser = null;
+    let editingId = null; // Track if we are editing
 
     // ==========================================
     // 2. Auth & Data
@@ -218,6 +223,36 @@
         renderList();
     }
 
+    window.editEntry = function(id) {
+        const item = localWorkarounds.find(i => i.id === id);
+        if(!item) return;
+
+        // Populate Form
+        document.getElementById('inTitle').value = item.title;
+        document.getElementById('inDesc').value = item.desc;
+        document.getElementById('inSteps').value = item.steps;
+        
+        // Set State
+        editingId = id;
+        document.getElementById('formTitle').innerText = "Edit Workaround";
+        document.getElementById('submitBtn').innerText = "Update Workaround";
+        document.getElementById('cancelEditBtn').classList.remove('hidden');
+        
+        window.switchTab('submit');
+    }
+
+    window.cancelEdit = function() {
+        editingId = null;
+        document.getElementById('inTitle').value = '';
+        document.getElementById('inDesc').value = '';
+        document.getElementById('inSteps').value = '';
+        
+        document.getElementById('formTitle').innerText = "Submit a Workaround";
+        document.getElementById('submitBtn').innerText = "Submit for Review";
+        document.getElementById('cancelEditBtn').classList.add('hidden');
+        window.switchTab('moderate');
+    }
+
     // ==========================================
     // 4. Render Logic
     // ==========================================
@@ -262,7 +297,8 @@
                 <p><em>${item.desc}</em></p>
                 <div class="steps">${item.steps}</div>
                 ${item.status === 'pending' ? `
-                    <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
+                    <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:flex; gap:10px;">
+                        <button class="btn btn-secondary" style="font-size:0.9em; padding:5px 10px;" onclick="editEntry('${item.id}')">Edit</button>
                         <button class="btn btn-success" style="font-size:0.9em; padding:5px 10px;" onclick="approve('${item.id}')">Approve</button>
                         <button class="btn btn-danger" style="font-size:0.9em; padding:5px 10px;" onclick="reject('${item.id}')">Reject</button>
                     </div>` : ''}
@@ -282,25 +318,37 @@
         if(!title || !steps) return alert("Please fill in the Title and Steps.");
 
         try {
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'workarounds'), {
-                title: title,
-                desc: desc,
-                steps: steps,
-                status: "pending",
-                createdAt: new Date().toISOString(),
-                authorId: currentUser.uid,
-                aiPolished: isPolished
-            });
-
-            alert("Submitted for review!");
-            document.getElementById('inTitle').value = '';
-            document.getElementById('inDesc').value = '';
-            document.getElementById('inSteps').value = '';
-            document.getElementById('inSteps').dataset.polished = 'false';
-            window.switchTab('search');
+            if (editingId) {
+                // UPDATE existing
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', editingId), {
+                    title: title,
+                    desc: desc,
+                    steps: steps,
+                    aiPolished: isPolished
+                });
+                alert("Workaround updated successfully!");
+                window.cancelEdit(); // Resets form and returns to moderate tab
+            } else {
+                // CREATE new
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'workarounds'), {
+                    title: title,
+                    desc: desc,
+                    steps: steps,
+                    status: "pending",
+                    createdAt: new Date().toISOString(),
+                    authorId: currentUser.uid,
+                    aiPolished: isPolished
+                });
+                alert("Submitted for review!");
+                document.getElementById('inTitle').value = '';
+                document.getElementById('inDesc').value = '';
+                document.getElementById('inSteps').value = '';
+                document.getElementById('inSteps').dataset.polished = 'false';
+                window.switchTab('search');
+            }
         } catch (e) {
-            console.error("Error adding document: ", e);
-            alert("Error submitting. Please try again.");
+            console.error("Error saving document: ", e);
+            alert("Error saving. Please try again.");
         }
     }
 

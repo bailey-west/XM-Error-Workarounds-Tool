@@ -348,7 +348,7 @@
     window.reject = async (id) => { if(confirm("Delete this submission?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', id)); };
 
     // ==========================================
-    // 6. PRODUCTION AI INTEGRATION (Updated)
+    // 6. PRODUCTION AI INTEGRATION
     // ==========================================
     
     async function callGroq(messages) {
@@ -364,11 +364,26 @@
             if (!response.ok) {
                 // Safely read the error message from the server (prevent JSON parse errors on 404/500 pages)
                 const errorText = await response.text();
+                
+                // Specific helpful error for the most common issue (404 in preview)
+                if (response.status === 404) {
+                    throw new Error("Backend function not found (404). This happens if the code isn't deployed to Netlify yet.");
+                }
+                
                 throw new Error(`Server returned ${response.status}: ${errorText.substring(0, 100)}`);
             }
             
             const data = await response.json();
-            return JSON.parse(data.choices[0].message.content);
+            
+            // Defensive parsing: Strip Markdown code blocks if AI added them
+            const content = data.choices?.[0]?.message?.content || "";
+            try {
+                return JSON.parse(content);
+            } catch (jsonError) {
+                // Regex to remove ```json ... ``` wrappers
+                const cleanJson = content.replace(/^```json\s*|```$/g, '').trim();
+                return JSON.parse(cleanJson);
+            }
         } catch (e) {
             console.error("AI Service Connection Error:", e);
             alert(`AI Service Error: ${e.message}\n\nCheck the console for full details.`);

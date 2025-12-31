@@ -348,7 +348,7 @@
     window.reject = async (id) => { if(confirm("Delete this submission?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', id)); };
 
     // ==========================================
-    // 6. PRODUCTION-ONLY AI INTEGRATION
+    // 6. PRODUCTION AI INTEGRATION (Updated)
     // ==========================================
     
     async function callGroq(messages) {
@@ -357,24 +357,21 @@
         try {
             const response = await fetch("/.netlify/functions/ai", {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ messages: messages })
             });
 
             if (!response.ok) {
-                if(response.status === 404) {
-                    // This error will happen in local previews where the Netlify function is missing.
-                    console.error("Netlify AI function not found (are you in preview?).");
-                    alert("AI Error: Server function not found. (If you are in preview, this is expected as the backend is missing).");
-                    return null;
-                }
-                throw new Error("Server function failed: " + response.statusText);
+                // Safely read the error message from the server (prevent JSON parse errors on 404/500 pages)
+                const errorText = await response.text();
+                throw new Error(`Server returned ${response.status}: ${errorText.substring(0, 100)}`);
             }
             
             const data = await response.json();
             return JSON.parse(data.choices[0].message.content);
         } catch (e) {
-            console.error("AI Service Error:", e);
-            alert("AI Service Unavailable: " + e.message);
+            console.error("AI Service Connection Error:", e);
+            alert(`AI Service Error: ${e.message}\n\nCheck the console for full details.`);
             return null;
         }
     }

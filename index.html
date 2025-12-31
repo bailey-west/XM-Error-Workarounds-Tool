@@ -127,6 +127,7 @@
 <div id="settings-modal" class="modal-overlay hidden">
     <div class="modal">
         <h3>Local Dev Settings</h3>
+        <p id="modal-status" style="color:#dc3545; font-weight:bold; margin-bottom:10px;"></p>
         <p style="font-size:0.8em; color:#666; margin-bottom:15px;">
             When deployed to Netlify, the app uses the secure Server Function. 
             <br><br>
@@ -261,15 +262,29 @@
 
     window.toggleSettings = function() {
         const modal = document.getElementById('settings-modal');
-        modal.classList.toggle('hidden');
+        const statusMsg = document.getElementById('modal-status');
+        
+        if (!modal.classList.contains('hidden')) {
+             // Closing
+             modal.classList.add('hidden');
+             if(statusMsg) statusMsg.innerText = ''; // Clear error when closing
+        } else {
+            // Opening
+            modal.classList.remove('hidden');
+        }
     }
 
     window.saveSettings = function() {
         const key = document.getElementById('groqKeyInput').value;
         if(key) localStorage.setItem('groqApiKey', key);
         else localStorage.removeItem('groqApiKey');
-        window.toggleSettings();
-        alert("Settings Saved");
+        
+        // Hide modal without full toggle logic to ensure it closes
+        document.getElementById('settings-modal').classList.add('hidden');
+        document.getElementById('modal-status').innerText = '';
+        
+        // Use console instead of alert to be less intrusive
+        console.log("Settings Saved");
     }
 
     // ==========================================
@@ -387,7 +402,13 @@
                 return JSON.parse(data.choices[0].message.content);
             } catch (error) {
                 console.error(error);
-                alert("Local AI Error. Check key.");
+                
+                // Show error in modal gracefully
+                const modal = document.getElementById('settings-modal');
+                const msg = document.getElementById('modal-status');
+                if(msg) msg.innerText = "⚠️ Local API Key failed. Please check your key.";
+                if(modal.classList.contains('hidden')) modal.classList.remove('hidden');
+                
                 return null;
             }
         }
@@ -402,7 +423,16 @@
 
             if (!response.ok) {
                 if(response.status === 404) {
-                    alert("Netlify Function not found. \n\nIf you are in Preview, open Settings (Gear Icon) and add a Dev Key.");
+                    // STOP using alert()
+                    // Open settings modal instead with helpful message
+                    const modal = document.getElementById('settings-modal');
+                    const msg = document.getElementById('modal-status');
+                    
+                    if(msg) msg.innerText = "⚠️ Netlify AI function not found in this preview. Please enter a key below to test.";
+                    
+                    if(modal.classList.contains('hidden')) {
+                        modal.classList.remove('hidden');
+                    }
                     return null;
                 }
                 throw new Error("Server function failed");
@@ -412,7 +442,7 @@
             return JSON.parse(data.choices[0].message.content);
         } catch (e) {
             console.error("AI Error:", e);
-            alert("AI service unavailable. Please try again later.");
+            // Optional: You could show this in the UI too, but console is fine for generic errors
             return null;
         }
     }

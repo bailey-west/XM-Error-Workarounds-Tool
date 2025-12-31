@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Workaround Hub + AI</title>
+    <title>Team Workaround Hub</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
@@ -15,11 +15,6 @@
         :root { --primary: #0056b3; --accent: #e9ecef; --text: #333; --ai: #7c3aed; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; color: var(--text); padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
-        
-        /* Header & settings */
-        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .settings-btn { background: none; border: none; cursor: pointer; color: #888; font-size: 24px; transition: color 0.2s; }
-        .settings-btn:hover { color: var(--text); }
         
         /* Navigation */
         .nav-tabs { display: flex; border-bottom: 2px solid var(--accent); margin-bottom: 20px; }
@@ -51,10 +46,6 @@
         .hidden { display: none; }
         #loading { text-align: center; color: #666; padding: 20px; }
         
-        /* Settings Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; display: flex; justify-content: center; align-items: center; }
-        .modal { background: white; padding: 30px; border-radius: 8px; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        
         /* AI Loading State */
         .ai-processing { opacity: 0.6; pointer-events: none; position: relative; }
         .ai-processing::after { content: "✨ AI working..."; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: black; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
@@ -63,12 +54,9 @@
 <body>
 
 <div class="container">
-    <div class="header-row">
-        <div>
-            <h1>Mobile Ops Knowledge Base</h1>
-            <span style="font-size: 0.8em; color: #888;">Firebase + Netlify AI</span>
-        </div>
-        <button class="settings-btn" onclick="toggleSettings()"><i class="ph ph-gear"></i></button>
+    <div style="margin-bottom: 20px;">
+        <h1>Mobile Ops Knowledge Base</h1>
+        <span style="font-size: 0.8em; color: #888;">Production System</span>
     </div>
 
     <!-- Navigation -->
@@ -123,26 +111,6 @@
     </div>
 </div>
 
-<!-- Config Modal -->
-<div id="settings-modal" class="modal-overlay hidden">
-    <div class="modal">
-        <h3>Local Dev Settings</h3>
-        <p id="modal-status" style="color:#dc3545; font-weight:bold; margin-bottom:10px;"></p>
-        <p style="font-size:0.8em; color:#666; margin-bottom:15px;">
-            When deployed to Netlify, the app uses the secure Server Function. 
-            <br><br>
-            If testing locally (Canvas/Preview), enter a key below to override the server function.
-        </p>
-        <label>Groq API Key (Optional)</label>
-        <input type="password" id="groqKeyInput" placeholder="gsk_...">
-        
-        <div style="display:flex; justify-content:flex-end; gap:10px;">
-            <button class="btn" onclick="toggleSettings()">Close</button>
-            <button class="btn btn-primary" onclick="saveSettings()">Save</button>
-        </div>
-    </div>
-</div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -150,10 +118,9 @@
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
     // ==========================================
-    // 1. CONFIGURATION (Production vs Preview)
+    // 1. PRODUCTION CONFIGURATION
     // ==========================================
     
-    // We are forcing the use of YOUR keys to ensure we connect to YOUR project.
     const firebaseConfig = {
         apiKey: "AIzaSyBI7Bf9nLzdcT3CRcz7bFjnOEGyN5Y_EWI",
         authDomain: "xm-errors-tool.firebaseapp.com",
@@ -171,11 +138,10 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     
-    // Initialize Analytics if supported in this environment
     try {
         const analytics = getAnalytics(app);
     } catch (e) {
-        console.log("Analytics not supported in this environment (likely strictly blocked iframe)", e);
+        console.log("Analytics initialized.");
     }
 
     let localWorkarounds = []; 
@@ -201,31 +167,22 @@
         } catch (error) {
             console.error("Auth failed:", error);
             
-            let errorMsg = error.message;
-            let tip = "";
-
-            // Check for common new-project errors
-            if (error.code === 'auth/operation-not-allowed' || error.code === 'auth/admin-restricted-operation') {
-                errorMsg = "Anonymous Authentication is disabled.";
-                tip = "Go to Firebase Console > Build > Authentication > Sign-in method > Enable Anonymous.";
+            // Production-friendly error message
+            let errorMsg = "Unable to connect to authentication service.";
+            if (error.code === 'auth/operation-not-allowed') {
+                errorMsg = "System configuration error: Authentication method disabled.";
             }
 
             document.getElementById('loading').innerHTML = `
                 <div style="color:#dc3545; background:#fff5f5; padding:15px; border-radius:8px; border:1px solid #ffc9c9;">
                     <strong>Connection Failed</strong><br>
-                    <span style="font-size:0.9em; font-family:monospace;">${errorMsg}</span>
-                    ${tip ? `<br><br><strong>Tip:</strong> ${tip}` : ''}
+                    <span style="font-size:0.9em;">${errorMsg}</span>
                 </div>
             `;
         }
-        
-        // Load Dev Key if exists
-        const savedKey = localStorage.getItem('groqApiKey');
-        if(savedKey) document.getElementById('groqKeyInput').value = savedKey;
     }
 
     function setupDataListener() {
-        // NOTE: In production, make sure your Firestore security rules allow read/write
         const fixesRef = collection(db, 'artifacts', appId, 'public', 'data', 'workarounds');
         
         onSnapshot(fixesRef, (snapshot) => {
@@ -239,10 +196,11 @@
             renderList();
         }, (error) => {
             console.error("Firestore Error:", error);
+            // Professional error handling
             document.getElementById('loading').innerHTML = `
                 <div style="color:#dc3545;">
-                    <strong>Error Loading Data</strong><br>
-                    ${error.code === 'permission-denied' ? 'Check your Firestore Security Rules (Test Mode recommended for dev).' : error.message}
+                    <strong>Access Denied</strong><br>
+                    ${error.code === 'permission-denied' ? 'You do not have permission to view these records.' : 'System error loading data.'}
                 </div>`;
         });
     }
@@ -258,33 +216,6 @@
         document.getElementById(`view-${tabName}`).classList.remove('hidden');
         document.getElementById(`tab-${tabName}`).classList.add('active');
         renderList();
-    }
-
-    window.toggleSettings = function() {
-        const modal = document.getElementById('settings-modal');
-        const statusMsg = document.getElementById('modal-status');
-        
-        if (!modal.classList.contains('hidden')) {
-             // Closing
-             modal.classList.add('hidden');
-             if(statusMsg) statusMsg.innerText = ''; // Clear error when closing
-        } else {
-            // Opening
-            modal.classList.remove('hidden');
-        }
-    }
-
-    window.saveSettings = function() {
-        const key = document.getElementById('groqKeyInput').value;
-        if(key) localStorage.setItem('groqApiKey', key);
-        else localStorage.removeItem('groqApiKey');
-        
-        // Hide modal without full toggle logic to ensure it closes
-        document.getElementById('settings-modal').classList.add('hidden');
-        document.getElementById('modal-status').innerText = '';
-        
-        // Use console instead of alert to be less intrusive
-        console.log("Settings Saved");
     }
 
     // ==========================================
@@ -377,44 +308,11 @@
     window.reject = async (id) => { if(confirm("Delete this submission?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', id)); };
 
     // ==========================================
-    // 6. SECURE AI INTEGRATION
+    // 6. PRODUCTION AI INTEGRATION
     // ==========================================
     
     async function callGroq(messages) {
-        // METHOD 1: Local Dev Key (If set in Settings Modal)
-        const localKey = localStorage.getItem('groqApiKey');
-        
-        if (localKey) {
-            console.log("Using Local Dev Key");
-            try {
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${localKey}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        messages: messages,
-                        model: "llama3-70b-8192",
-                        temperature: 0.1,
-                        response_format: { type: "json_object" }
-                    })
-                });
-                if(!response.ok) throw new Error("API Call failed");
-                const data = await response.json();
-                return JSON.parse(data.choices[0].message.content);
-            } catch (error) {
-                console.error(error);
-                
-                // Show error in modal gracefully
-                const modal = document.getElementById('settings-modal');
-                const msg = document.getElementById('modal-status');
-                if(msg) msg.innerText = "⚠️ Local API Key failed. Please check your key.";
-                if(modal.classList.contains('hidden')) modal.classList.remove('hidden');
-                
-                return null;
-            }
-        }
-
-        // METHOD 2: Netlify Function (Production)
-        console.log("Using Netlify Function");
+        // Only use the secure Netlify server function
         try {
             const response = await fetch("/.netlify/functions/ai", {
                 method: "POST",
@@ -422,17 +320,11 @@
             });
 
             if (!response.ok) {
+                // If 404, it means the function isn't deployed yet.
+                // In production, we fail silently or alert cleanly.
                 if(response.status === 404) {
-                    // STOP using alert()
-                    // Open settings modal instead with helpful message
-                    const modal = document.getElementById('settings-modal');
-                    const msg = document.getElementById('modal-status');
-                    
-                    if(msg) msg.innerText = "⚠️ Netlify AI function not found in this preview. Please enter a key below to test.";
-                    
-                    if(modal.classList.contains('hidden')) {
-                        modal.classList.remove('hidden');
-                    }
+                    console.error("AI Function not found.");
+                    alert("AI features are currently unavailable. Please contact the administrator.");
                     return null;
                 }
                 throw new Error("Server function failed");
@@ -442,7 +334,7 @@
             return JSON.parse(data.choices[0].message.content);
         } catch (e) {
             console.error("AI Error:", e);
-            // Optional: You could show this in the UI too, but console is fine for generic errors
+            alert("AI service unavailable. Please try again later.");
             return null;
         }
     }

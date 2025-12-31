@@ -152,10 +152,8 @@
     // 1. CONFIGURATION (Production vs Preview)
     // ==========================================
     
-    // In Canvas/Preview, `__firebase_config` is injected automatically.
-    // For Production (Netlify), we use the config you provided:
-    
-    const productionConfig = {
+    // We are forcing the use of YOUR keys to ensure we connect to YOUR project.
+    const firebaseConfig = {
         apiKey: "AIzaSyBI7Bf9nLzdcT3CRcz7bFjnOEGyN5Y_EWI",
         authDomain: "xm-errors-tool.firebaseapp.com",
         projectId: "xm-errors-tool",
@@ -164,10 +162,6 @@
         appId: "1:855317746690:web:a0df2990df8e28367dc31b",
         measurementId: "G-XPVGQNKJER"
     };
-
-    const firebaseConfig = (typeof __firebase_config !== 'undefined') 
-        ? JSON.parse(__firebase_config) 
-        : productionConfig;
 
     const appId = (typeof __app_id !== 'undefined') ? __app_id : 'default-app-id';
     

@@ -205,9 +205,22 @@
             });
         } catch (error) {
             console.error("Auth failed:", error);
+            
+            let errorMsg = error.message;
+            let tip = "";
+
+            // Check for common new-project errors
+            if (error.code === 'auth/operation-not-allowed' || error.code === 'auth/admin-restricted-operation') {
+                errorMsg = "Anonymous Authentication is disabled.";
+                tip = "Go to Firebase Console > Build > Authentication > Sign-in method > Enable Anonymous.";
+            }
+
             document.getElementById('loading').innerHTML = `
-                <p style="color:red">Connection Failed</p>
-                <small>Check console for Firebase errors.</small>
+                <div style="color:#dc3545; background:#fff5f5; padding:15px; border-radius:8px; border:1px solid #ffc9c9;">
+                    <strong>Connection Failed</strong><br>
+                    <span style="font-size:0.9em; font-family:monospace;">${errorMsg}</span>
+                    ${tip ? `<br><br><strong>Tip:</strong> ${tip}` : ''}
+                </div>
             `;
         }
         
@@ -231,7 +244,11 @@
             renderList();
         }, (error) => {
             console.error("Firestore Error:", error);
-            document.getElementById('loading').innerHTML = `<p style="color:red">Error loading data. Check console.</p>`;
+            document.getElementById('loading').innerHTML = `
+                <div style="color:#dc3545;">
+                    <strong>Error Loading Data</strong><br>
+                    ${error.code === 'permission-denied' ? 'Check your Firestore Security Rules (Test Mode recommended for dev).' : error.message}
+                </div>`;
         });
     }
 

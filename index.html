@@ -151,24 +151,38 @@
     let localWorkarounds = []; 
     let currentUser = null;
     let editingId = null; 
+    let dataListenerSetup = false;
 
     // ==========================================
     // 2. Auth & Data
     // ==========================================
-    async function initApp() {
+    function initApp() {
+        // 1. Setup Auth Listener FIRST to catch state changes immediately
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                if (!dataListenerSetup) {
+                    setupDataListener();
+                }
+            } else {
+                 // Attempt sign in if not authenticated
+                 doLogin();
+            }
+        });
+
+        // 2. Trigger Sign In (if not already handled by onAuthStateChanged)
+        if (!auth.currentUser) {
+            doLogin();
+        }
+    }
+
+    async function doLogin() {
         try {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 await signInWithCustomToken(auth, __initial_auth_token);
             } else {
                 await signInAnonymously(auth);
             }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    setupDataListener();
-                }
-            });
         } catch (error) {
             console.error("Auth failed:", error);
             
@@ -187,6 +201,7 @@
     }
 
     function setupDataListener() {
+        dataListenerSetup = true;
         const fixesRef = collection(db, 'artifacts', appId, 'public', 'data', 'workarounds');
         
         onSnapshot(fixesRef, (snapshot) => {

@@ -156,23 +156,31 @@
     // ==========================================
     // 2. Auth & Data
     // ==========================================
-    function initApp() {
-        // 1. Setup Auth Listener FIRST to catch state changes immediately
+    async function initApp() {
+        // 0. Safety Timeout: If it hangs for 8 seconds, force a UI update
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            if (loading && !loading.classList.contains('hidden')) {
+                // If we're stuck, just hide loading so user can at least see empty state
+                // loading.classList.add('hidden');
+                // document.getElementById('view-search').classList.remove('hidden');
+                loading.innerHTML = '<div style="color:#666">Connecting is taking longer than usual... <br><button class="btn btn-secondary" onclick="location.reload()" style="margin-top:10px;">Reload App</button></div>';
+            }
+        }, 8000);
+
+        // 1. Setup Auth Listener
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 if (!dataListenerSetup) {
                     setupDataListener();
                 }
-            } else {
-                 // Attempt sign in if not authenticated
-                 doLogin();
             }
         });
 
-        // 2. Trigger Sign In (if not already handled by onAuthStateChanged)
+        // 2. Trigger Login ONLY if needed
         if (!auth.currentUser) {
-            doLogin();
+            await doLogin();
         }
     }
 

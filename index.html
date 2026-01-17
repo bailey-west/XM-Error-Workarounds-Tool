@@ -3,232 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Workaround Hub</title>
+    <title>XM Error Workarounds Tool</title>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        :root { --primary: #0056b3; --accent: #e9ecef; --text: #333; --ai: #7c3aed; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; color: var(--text); padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
+        /* Xfinity Mobile Inspired Theme */
+        :root { 
+            --xm-purple: #6138f5; 
+            --xm-dark: #1f1f1f; 
+            --xm-light: #f3f3f3; 
+            --text: #1a1a1a; 
+            --bg: #ffffff;
+        }
+        
+        body { 
+            font-family: 'Xfinity Standard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: #f8f9fa; 
+            color: var(--text); 
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: var(--bg); 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08); 
+        }
+        
+        /* Header */
+        h1 { font-weight: 700; letter-spacing: -0.5px; margin-bottom: 5px; color: black; }
         
         /* Navigation */
-        .nav-tabs { display: flex; border-bottom: 2px solid var(--accent); margin-bottom: 20px; }
-        .nav-tabs button { background: none; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; color: #666; display: flex; align-items: center; gap: 8px; }
-        .nav-tabs button.active { border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: bold; margin-bottom: -2px; }
+        .nav-tabs { display: flex; gap: 20px; border-bottom: 2px solid #eee; margin-bottom: 30px; padding-bottom: 0; }
+        .nav-tabs button { 
+            background: none; 
+            border: none; 
+            padding: 15px 0; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: 500;
+            color: #666; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: color 0.2s;
+            position: relative;
+        }
+        .nav-tabs button:hover { color: var(--xm-purple); }
+        .nav-tabs button.active { color: var(--xm-purple); font-weight: 700; }
+        .nav-tabs button.active::after { 
+            content: ''; position: absolute; bottom: -2px; left: 0; right: 0; 
+            height: 3px; background: var(--xm-purple); border-radius: 3px 3px 0 0; 
+        }
         
-        /* Forms & Inputs */
-        input, textarea, select { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        input:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,86,179,0.1); }
+        /* Inputs */
+        label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #666; margin-bottom: 4px; display: block; }
+        input, textarea { 
+            width: 100%; padding: 16px; margin-bottom: 20px; 
+            border: 1px solid #e0e0e0; border-radius: 8px; 
+            font-size: 15px; background: #fafafa; transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus { outline: none; border-color: var(--xm-purple); background: white; box-shadow: 0 0 0 4px rgba(97, 56, 245, 0.1); }
         
-        button.btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.1s; }
+        /* Buttons */
+        button.btn { 
+            padding: 14px 24px; border: none; border-radius: 50px; 
+            cursor: pointer; font-weight: 600; font-size: 15px;
+            display: inline-flex; align-items: center; gap: 8px; 
+            transition: transform 0.1s, box-shadow 0.2s; 
+        }
         button.btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-ai { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .btn-success { background: #10b981; color: white; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
+        .btn-primary { background: var(--xm-purple); color: white; box-shadow: 0 4px 12px rgba(97, 56, 245, 0.3); }
+        .btn-primary:hover { background: #4f2dc7; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn-danger { background: #fff5f5; color: #d32f2f; }
+        .btn-success { background: #e8f5e9; color: #2e7d32; }
         
-        /* Search Bar Area */
-        .search-wrapper { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-wrapper input { margin: 0; }
+        /* Search */
+        .search-wrapper { position: relative; margin-bottom: 30px; }
+        .search-wrapper input { padding-left: 50px; border-radius: 50px; border: 2px solid #eee; }
+        .search-wrapper input:focus { border-color: var(--xm-purple); }
+        .search-icon { position: absolute; left: 20px; top: 18px; color: #999; font-size: 20px; }
         
         /* Cards */
-        .card { border: 1px solid #eee; padding: 20px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid var(--primary); background: white; transition: box-shadow 0.2s; }
-        .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card.pending { border-left-color: #f59e0b; background-color: #fffbf0; }
-        .card h3 { margin-top: 0; color: var(--primary); margin-bottom: 5px; }
-        .steps { white-space: pre-wrap; background: #f8f9fa; padding: 15px; border-radius: 6px; font-family: monospace; border: 1px solid #e9ecef; margin-top: 10px; }
+        .card { 
+            border: 1px solid #eee; padding: 25px; margin-bottom: 20px; 
+            border-radius: 12px; background: white; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+        .card h3 { margin: 0 0 8px 0; color: var(--xm-dark); font-size: 18px; }
+        .card p { color: #555; line-height: 1.5; margin: 0 0 15px 0; }
+        .steps { 
+            background: #f8f9fa; padding: 20px; border-radius: 8px; 
+            font-family: -apple-system, sans-serif; color: #333; 
+            line-height: 1.6; font-size: 15px;
+        }
         
+        /* Loading & Hidden */
         .hidden { display: none; }
-        #loading { text-align: center; color: #666; padding: 20px; }
-        
-        /* AI Loading State */
-        .ai-processing { opacity: 0.6; pointer-events: none; position: relative; }
-        .ai-processing::after { content: "✨ AI working..."; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: black; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.9); z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div style="margin-bottom: 20px;">
-        <h1>Mobile Ops Knowledge Base</h1>
-        <span style="font-size: 0.8em; color: #888;">Production System</span>
+    <div style="margin-bottom: 30px;">
+        <h1>XM Error Workarounds Tool</h1>
     </div>
 
     <div class="nav-tabs">
-        <button onclick="switchTab('search')" class="active" id="tab-search"><i class="ph ph-magnifying-glass"></i> Find Fixes</button>
-        <button onclick="switchTab('submit')" id="tab-submit"><i class="ph ph-plus-circle"></i> Submit New</button>
-        <button onclick="switchTab('moderate')" id="tab-moderate"><i class="ph ph-shield-check"></i> Queue <span id="badge" style="background:var(--primary); color:white; padding:2px 6px; border-radius:10px; font-size:10px; margin-left:5px;">0</span></button>
+        <button onclick="switchTab('search')" class="active" id="tab-search">Find Workaround</button>
+        <button onclick="switchTab('submit')" id="tab-submit">Submit New</button>
+        <button onclick="switchTab('moderate')" id="tab-moderate">
+            Queue <span id="badge" style="background:var(--xm-purple); color:white; padding:2px 8px; border-radius:12px; font-size:11px; margin-left:6px;">0</span>
+        </button>
     </div>
 
-    <div id="loading">Connecting to database...</div>
+    <div id="loading" style="text-align:center; padding:40px; color:#666;">Initializing...</div>
 
     <div id="view-search" class="hidden">
         <div class="search-wrapper">
-            <input type="text" id="searchInput" placeholder="Search issues (e.g. 'ship flow')..." onkeyup="handleSearchKeyup(event)">
-            <button class="btn btn-ai" onclick="performAISearch()" title="Use AI to find meaning, not just keywords">
-                <i class="ph ph-sparkle"></i> Smart Search
-            </button>
+            <i class="ph ph-magnifying-glass search-icon"></i>
+            <input type="text" id="searchInput" placeholder="Search by error message or symptoms..." onkeyup="renderList()">
         </div>
         <div id="approved-list"></div>
     </div>
 
     <div id="view-submit" class="hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 id="formTitle">Submit a Workaround</h3>
-            <button class="btn btn-ai" onclick="aiPolish()" id="polishBtn">
-                <i class="ph ph-magic-wand"></i> AI Polish
-            </button>
+        <div style="text-align:center; margin-bottom:30px;">
+            <h3>Submit a New Fix</h3>
+            <p style="color:#666;">Enter your rough notes below. Our AI will automatically format and polish them when you submit.</p>
         </div>
-        <p style="color:#666; font-size:0.9em; margin-bottom:20px;">Write your rough notes below, then hit <strong>AI Polish</strong> to clean up typos and formatting before submitting.</p>
         
         <div id="form-content">
-            <label><strong>Issue / Error Name</strong></label>
-            <input type="text" id="inTitle" placeholder="e.g., Order forces 'Bypass to ship flow'">
+            <label>Error Name / Title</label>
+            <input type="text" id="inTitle" placeholder="e.g. Activation stuck on 'waiting for carrier'">
             
-            <label><strong>Description (Symptoms)</strong></label>
-            <textarea id="inDesc" rows="2" placeholder="What does the error look like?"></textarea>
+            <label>Symptoms</label>
+            <textarea id="inDesc" rows="2" placeholder="What is the customer seeing?"></textarea>
             
-            <label><strong>The Fix (Step-by-step)</strong></label>
-            <textarea id="inSteps" rows="5" placeholder="1. Clear cache on iPad&#10;2. Sign out everywhere..."></textarea>
+            <label>Rough Steps (We'll format this for you)</label>
+            <textarea id="inSteps" rows="5" placeholder="Just type what you did... e.g. 'i reset network settings then swapped sim'"></textarea>
             
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-secondary hidden" id="cancelEditBtn" onclick="cancelEdit()" style="flex:1;">Cancel</button>
-                <button class="btn btn-primary" id="submitBtn" onclick="submitEntry()" style="flex:2; justify-content:center;">Submit for Review</button>
+            <div style="margin-top:20px; display:flex; gap:15px;">
+                <button class="btn btn-secondary" onclick="clearForm()" style="flex:1;">Clear</button>
+                <button class="btn btn-primary" id="submitBtn" onclick="submitWithAI()" style="flex:3; justify-content:center;">
+                    <i class="ph ph-magic-wand"></i> Polish & Submit
+                </button>
             </div>
         </div>
     </div>
 
     <div id="view-moderate" class="hidden">
-        <h3>Pending Approvals</h3>
-        <p>Review rep submissions before they go live.</p>
+        <h3>Manager Queue</h3>
+        <p style="margin-bottom:20px; color:#666;">Review and approve rep submissions.</p>
         <div id="pending-list"></div>
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+<div id="overlay" class="loading-overlay hidden">
+    <i class="ph ph-spinner ph-spin" style="font-size:40px; color:var(--xm-purple); margin-bottom:15px;"></i>
+    <div id="overlay-text" style="font-weight:600; color:#333;">AI is polishing your submission...</div>
+</div>
 
-    // ==========================================
-    // 1. PRODUCTION CONFIGURATION
-    // ==========================================
-    
+<script type="module">
+    // --- FIREBASE SETUP ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
     const firebaseConfig = {
         apiKey: "AIzaSyBI7Bf9nLzdcT3CRcz7bFjnOEGyN5Y_EWI",
         authDomain: "xm-errors-tool.firebaseapp.com",
         projectId: "xm-errors-tool",
         storageBucket: "xm-errors-tool.firebasestorage.app",
         messagingSenderId: "855317746690",
-        appId: "1:855317746690:web:a0df2990df8e28367dc31b",
-        measurementId: "G-XPVGQNKJER"
+        appId: "1:855317746690:web:a0df2990df8e28367dc31b"
     };
 
-    const appId = (typeof __app_id !== 'undefined') ? __app_id : 'default-app-id';
-    
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    
-    try {
-        const analytics = getAnalytics(app);
-    } catch (e) {
-        console.log("Analytics initialized.");
-    }
+    const appId = 'default-app-id';
 
-    let localWorkarounds = []; 
-    let currentUser = null;
-    let editingId = null; 
-    let dataListenerSetup = false;
+    let localWorkarounds = [];
+    let isManager = false; // Simple local check
 
-    // ==========================================
-    // 2. Auth & Data
-    // ==========================================
-    async function initApp() {
-        // 0. Safety Timeout: If it hangs for 8 seconds, force a UI update
-        setTimeout(() => {
-            const loading = document.getElementById('loading');
-            if (loading && !loading.classList.contains('hidden')) {
-                // If we're stuck, just hide loading so user can at least see empty state
-                // loading.classList.add('hidden');
-                // document.getElementById('view-search').classList.remove('hidden');
-                loading.innerHTML = '<div style="color:#666">Connecting is taking longer than usual... <br><button class="btn btn-secondary" onclick="location.reload()" style="margin-top:10px;">Reload App</button></div>';
-            }
-        }, 8000);
-
-        // 1. Setup Auth Listener
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                if (!dataListenerSetup) {
-                    setupDataListener();
-                }
-            }
-        });
-
-        // 2. Trigger Login ONLY if needed
-        if (!auth.currentUser) {
-            await doLogin();
-        }
-    }
-
-    async function doLogin() {
-        try {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        } catch (error) {
-            console.error("Auth failed:", error);
-            
-            let errorMsg = "Unable to connect to authentication service.";
-            if (error.code === 'auth/operation-not-allowed') {
-                errorMsg = "System configuration error: Authentication method disabled.";
-            }
-
-            document.getElementById('loading').innerHTML = `
-                <div style="color:#dc3545; background:#fff5f5; padding:15px; border-radius:8px; border:1px solid #ffc9c9;">
-                    <strong>Connection Failed</strong><br>
-                    <span style="font-size:0.9em;">${errorMsg}</span>
-                </div>
-            `;
-        }
-    }
+    // --- AUTH & DATA ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) setupDataListener();
+        else signInAnonymously(auth);
+    });
 
     function setupDataListener() {
-        dataListenerSetup = true;
         const fixesRef = collection(db, 'artifacts', appId, 'public', 'data', 'workarounds');
-        
         onSnapshot(fixesRef, (snapshot) => {
-            localWorkarounds = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            
+            localWorkarounds = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             document.getElementById('loading').classList.add('hidden');
-            document.getElementById('view-search').classList.remove('hidden'); 
+            document.getElementById('view-search').classList.remove('hidden');
             renderList();
-        }, (error) => {
-            console.error("Firestore Error:", error);
-            document.getElementById('loading').innerHTML = `
-                <div style="color:#dc3545;">
-                    <strong>Access Denied</strong><br>
-                    ${error.code === 'permission-denied' ? 'You do not have permission to view these records.' : 'System error loading data.'}
-                </div>`;
         });
     }
 
-    // ==========================================
-    // 3. UI Helpers
-    // ==========================================
+    // --- NAVIGATION & MANAGER LOCK ---
     window.switchTab = function(tabName) {
+        if (tabName === 'moderate' && !isManager) {
+            const pw = prompt("Enter Manager Password:");
+            if (pw === "xm2026") {
+                isManager = true;
+            } else {
+                alert("Incorrect password.");
+                return;
+            }
+        }
+        
         ['search', 'submit', 'moderate'].forEach(t => {
             document.getElementById(`view-${t}`).classList.add('hidden');
             document.getElementById(`tab-${t}`).classList.remove('active');
@@ -238,255 +237,136 @@
         renderList();
     }
 
-    window.editEntry = function(id) {
-        const item = localWorkarounds.find(i => i.id === id);
-        if(!item) return;
+    // --- SUBMISSION LOGIC (INTEGRATED AI) ---
+    window.submitWithAI = async function() {
+        const title = document.getElementById('inTitle').value;
+        const desc = document.getElementById('inDesc').value;
+        const steps = document.getElementById('inSteps').value;
 
-        document.getElementById('inTitle').value = item.title;
-        document.getElementById('inDesc').value = item.desc;
-        document.getElementById('inSteps').value = item.steps;
-        
-        editingId = id;
-        document.getElementById('formTitle').innerText = "Edit Workaround";
-        document.getElementById('submitBtn').innerText = "Update Workaround";
-        document.getElementById('cancelEditBtn').classList.remove('hidden');
-        
-        window.switchTab('submit');
+        if(!title || !steps) return alert("Please fill in Title and Steps.");
+
+        // Show loading
+        const overlay = document.getElementById('overlay');
+        overlay.classList.remove('hidden');
+
+        let finalTitle = title;
+        let finalDesc = desc;
+        let finalSteps = steps;
+
+        // 1. Call AI
+        try {
+            const prompt = `
+                You are an editor for a technical knowledge base.
+                Please rewrite this submission to be professional, clear, and concise.
+                
+                IMPORTANT: Format the 'steps' as a clear, bulleted list (using - or *).
+                
+                Input Title: ${title}
+                Input Desc: ${desc}
+                Input Steps: ${steps}
+
+                Return JSON: { "title": "...", "desc": "...", "steps": "..." }
+            `;
+
+            const response = await fetch("/.netlify/functions/ai", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ messages: [{ role: "user", content: prompt }] })
+            });
+
+            if(response.ok) {
+                const data = await response.json();
+                const content = JSON.parse(data.choices[0].message.content);
+                finalTitle = content.title;
+                finalDesc = content.desc;
+                finalSteps = content.steps;
+            } else {
+                console.warn("AI skipped due to error, submitting raw.");
+            }
+        } catch (e) {
+            console.error("AI Error", e);
+        }
+
+        // 2. Save to Firebase
+        try {
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'workarounds'), {
+                title: finalTitle,
+                desc: finalDesc,
+                steps: finalSteps,
+                status: "pending",
+                createdAt: new Date().toISOString(),
+                aiPolished: true
+            });
+            
+            overlay.classList.add('hidden');
+            alert("Success! Your fix has been polished and sent to the manager queue.");
+            window.clearForm();
+            window.switchTab('search');
+            
+        } catch (e) {
+            overlay.classList.add('hidden');
+            alert("Error saving: " + e.message);
+        }
     }
 
-    window.cancelEdit = function() {
-        editingId = null;
+    window.clearForm = function() {
         document.getElementById('inTitle').value = '';
         document.getElementById('inDesc').value = '';
         document.getElementById('inSteps').value = '';
-        
-        document.getElementById('formTitle').innerText = "Submit a Workaround";
-        document.getElementById('submitBtn').innerText = "Submit for Review";
-        document.getElementById('cancelEditBtn').classList.add('hidden');
-        window.switchTab('moderate');
     }
 
-    // ==========================================
-    // 4. Render Logic
-    // ==========================================
-    window.renderList = function(customList = null) {
-        const listToRender = customList || localWorkarounds;
+    // --- RENDER LOGIC ---
+    window.renderList = function() {
         const searchVal = document.getElementById('searchInput').value.toLowerCase();
-        
         const approvedContainer = document.getElementById('approved-list');
         const pendingContainer = document.getElementById('pending-list');
         
         approvedContainer.innerHTML = '';
         pendingContainer.innerHTML = '';
+        
         let pendingCount = 0;
 
-        const pendingItems = localWorkarounds.filter(i => i.status === 'pending');
-        pendingItems.forEach(item => {
-            pendingContainer.innerHTML += createCard(item);
-            pendingCount++;
-        });
-
-        const approvedItems = listToRender.filter(i => i.status === 'approved');
-        approvedItems.forEach(item => {
-            if (customList || item.title.toLowerCase().includes(searchVal) || item.desc.toLowerCase().includes(searchVal)) {
-                approvedContainer.innerHTML += createCard(item);
+        localWorkarounds.forEach(item => {
+            // Manager Queue
+            if (item.status === 'pending') {
+                pendingCount++;
+                pendingContainer.innerHTML += createCard(item, true);
+            } 
+            // Public Search
+            else if (item.status === 'approved') {
+                if (item.title.toLowerCase().includes(searchVal) || item.desc.toLowerCase().includes(searchVal)) {
+                    approvedContainer.innerHTML += createCard(item, false);
+                }
             }
         });
 
         document.getElementById('badge').innerText = pendingCount;
-        if(pendingCount === 0) pendingContainer.innerHTML = '<p class="text-gray-500">No pending submissions.</p>';
-        if(approvedContainer.innerHTML === '') approvedContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">No fixes found.</p>';
+        if(approvedContainer.innerHTML === '') approvedContainer.innerHTML = '<div style="text-align:center; color:#999; margin-top:40px;">No workarounds found.</div>';
     }
 
-    function createCard(item) {
+    function createCard(item, isPending) {
+        // Convert markdown bullets to HTML breaks for display if needed, or rely on pre-wrap
         return `
-            <div class="card ${item.status === 'pending' ? 'pending' : ''}">
-                <div style="display:flex; justify-content:space-between;">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:start;">
                     <h3>${item.title}</h3>
-                    ${item.aiPolished ? '<span title="AI Polished" style="font-size:12px; background:#f3e8ff; color:#7c3aed; padding:2px 8px; border-radius:10px; height:fit-content;">✨ AI</span>' : ''}
+                    ${item.aiPolished ? '<i class="ph ph-sparkle" style="color:var(--xm-purple);" title="AI Polished"></i>' : ''}
                 </div>
-                <p><em>${item.desc}</em></p>
-                <div class="steps">${item.steps}</div>
-                ${item.status === 'pending' ? `
-                    <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:flex; gap:10px;">
-                        <button class="btn btn-secondary" style="font-size:0.9em; padding:5px 10px;" onclick="editEntry('${item.id}')">Edit</button>
-                        <button class="btn btn-success" style="font-size:0.9em; padding:5px 10px;" onclick="approve('${item.id}')">Approve</button>
-                        <button class="btn btn-danger" style="font-size:0.9em; padding:5px 10px;" onclick="reject('${item.id}')">Reject</button>
+                <p>${item.desc}</p>
+                <div class="steps" style="white-space: pre-wrap;">${item.steps}</div>
+                ${isPending ? `
+                    <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px; display:flex; gap:10px;">
+                        <button class="btn btn-success" style="font-size:13px; padding:8px 16px;" onclick="approve('${item.id}')">Approve</button>
+                        <button class="btn btn-danger" style="font-size:13px; padding:8px 16px;" onclick="reject('${item.id}')">Reject</button>
                     </div>` : ''}
             </div>
         `;
     }
 
-    // ==========================================
-    // 5. Database Actions
-    // ==========================================
-    window.submitEntry = async function() {
-        const title = document.getElementById('inTitle').value;
-        const desc = document.getElementById('inDesc').value;
-        const steps = document.getElementById('inSteps').value;
-        const isPolished = document.getElementById('inSteps').dataset.polished === 'true';
-
-        if(!title || !steps) return alert("Please fill in the Title and Steps.");
-
-        try {
-            if (editingId) {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', editingId), {
-                    title: title,
-                    desc: desc,
-                    steps: steps,
-                    aiPolished: isPolished
-                });
-                alert("Workaround updated successfully!");
-                window.cancelEdit(); 
-            } else {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'workarounds'), {
-                    title: title,
-                    desc: desc,
-                    steps: steps,
-                    status: "pending",
-                    createdAt: new Date().toISOString(),
-                    authorId: currentUser.uid,
-                    aiPolished: isPolished
-                });
-                alert("Submitted for review!");
-                document.getElementById('inTitle').value = '';
-                document.getElementById('inDesc').value = '';
-                document.getElementById('inSteps').value = '';
-                document.getElementById('inSteps').dataset.polished = 'false';
-                window.switchTab('search');
-            }
-        } catch (e) {
-            console.error("Error saving document: ", e);
-            alert("Error saving. Please try again.");
-        }
-    }
-
+    // --- DB ACTIONS ---
     window.approve = async (id) => updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', id), { status: "approved" });
-    window.reject = async (id) => { if(confirm("Delete this submission?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', id)); };
-
-    // ==========================================
-    // 6. PRODUCTION AI INTEGRATION
-    // ==========================================
-    
-    async function callGroq(messages) {
-        // Only use the secure Netlify server function
-        // No client-side simulation or fallback.
-        try {
-            const response = await fetch("/.netlify/functions/ai", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ messages: messages })
-            });
-
-            if (!response.ok) {
-                // Safely read the error message from the server (prevent JSON parse errors on 404/500 pages)
-                const errorText = await response.text();
-                
-                // Specific helpful error for the most common issue (404 in preview)
-                if (response.status === 404) {
-                    throw new Error("Backend function not found (404). This happens if the code isn't deployed to Netlify yet.");
-                }
-                
-                throw new Error(`Server returned ${response.status}: ${errorText.substring(0, 100)}`);
-            }
-            
-            const data = await response.json();
-            
-            // Defensive parsing: Strip Markdown code blocks if AI added them
-            const content = data.choices?.[0]?.message?.content || "";
-            try {
-                return JSON.parse(content);
-            } catch (jsonError) {
-                // Regex to remove ```json ... ``` wrappers
-                const cleanJson = content.replace(/^```json\s*|```$/g, '').trim();
-                return JSON.parse(cleanJson);
-            }
-        } catch (e) {
-            console.error("AI Service Connection Error:", e);
-            alert(`AI Service Error: ${e.message}\n\nCheck the console for full details.`);
-            return null;
-        }
-    }
-
-    // Feature A: AI Polish
-    window.aiPolish = async function() {
-        const title = document.getElementById('inTitle').value;
-        const desc = document.getElementById('inDesc').value;
-        const steps = document.getElementById('inSteps').value;
-
-        if(!steps) return alert("Write some rough steps first!");
-
-        const formDiv = document.getElementById('form-content');
-        formDiv.classList.add('ai-processing');
-
-        const prompt = `
-            You are a professional technical writer. 
-            Rewrite the following issue submission to be clear, professional, and free of typos.
-            Format 'steps' as a numbered list.
-            
-            Input:
-            Title: ${title}
-            Description: ${desc}
-            Steps: ${steps}
-
-            Return JSON: { "title": "...", "desc": "...", "steps": "..." }
-        `;
-
-        const result = await callGroq([{ role: "user", content: prompt }]);
-
-        if (result) {
-            document.getElementById('inTitle').value = result.title;
-            document.getElementById('inDesc').value = result.desc;
-            document.getElementById('inSteps').value = result.steps;
-            document.getElementById('inSteps').dataset.polished = 'true';
-        }
-
-        formDiv.classList.remove('ai-processing');
-    }
-
-    // Feature B: Smart Search
-    window.handleSearchKeyup = (e) => {
-        if(e.key === 'Enter') window.performAISearch();
-        else window.renderList();
-    }
-
-    window.performAISearch = async function() {
-        const query = document.getElementById('searchInput').value;
-        if(!query) return;
-
-        const btn = document.querySelector('.btn-ai');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Thinking...';
-        
-        const corpus = localWorkarounds
-            .filter(i => i.status === 'approved')
-            .map(i => ({ id: i.id, title: i.title, desc: i.desc }));
-
-        const prompt = `
-            You are a support assistant.
-            User Query: "${query}"
-            
-            Database:
-            ${JSON.stringify(corpus)}
-
-            Return a JSON object with a key "matchIds" containing an array of IDs for the items that best answer the user's query. 
-            If the user is describing symptoms, match them to the correct issue.
-            Return: { "matchIds": ["id1", "id2"] }
-        `;
-
-        const result = await callGroq([{ role: "user", content: prompt }]);
-        
-        if (result && result.matchIds) {
-            const aiFilteredList = localWorkarounds.filter(item => result.matchIds.includes(item.id));
-            window.renderList(aiFilteredList);
-        }
-
-        btn.innerHTML = originalText;
-    }
-
-    initApp();
+    window.reject = async (id) => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', id));
 
 </script>
-
 </body>
 </html>

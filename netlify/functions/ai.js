@@ -16,7 +16,7 @@ exports.handler = async function(event, context) {
         // Call the Groq API
         const chatCompletion = await groq.chat.completions.create({
             "messages": messages,
-            "model": "llama3-70b-8192", // High quality model for polishing
+            "model": "llama-3.3-70b-versatile", // High quality model for polishing
             "temperature": 0.5,
             "max_tokens": 1024,
             "top_p": 1,

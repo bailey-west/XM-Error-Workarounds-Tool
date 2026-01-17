@@ -81,14 +81,16 @@
         button.btn:active { transform: scale(0.98); }
         .btn-primary { background: var(--xm-purple); color: white; box-shadow: 0 4px 12px rgba(97, 56, 245, 0.3); }
         .btn-primary:hover { background: #4f2dc7; }
+        .btn-ai { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: 1px solid rgba(255,255,255,0.2); }
         .btn-secondary { background: #f0f0f0; color: #333; }
         .btn-danger { background: #fff5f5; color: #d32f2f; }
         .btn-success { background: #e8f5e9; color: #2e7d32; }
         
         /* Search */
-        .search-wrapper { position: relative; margin-bottom: 30px; }
-        .search-wrapper input { padding-left: 50px; border-radius: 50px; border: 2px solid #eee; }
-        .search-wrapper input:focus { border-color: var(--xm-purple); }
+        .search-wrapper { position: relative; margin-bottom: 30px; display: flex; gap: 10px; }
+        .search-input-container { position: relative; flex-grow: 1; }
+        .search-input-container input { padding-left: 50px; border-radius: 50px; border: 2px solid #eee; margin-bottom: 0; }
+        .search-input-container input:focus { border-color: var(--xm-purple); }
         .search-icon { position: absolute; left: 20px; top: 18px; color: #999; font-size: 20px; }
         
         /* Cards */
@@ -134,15 +136,20 @@
 
     <div id="view-search" class="hidden">
         <div class="search-wrapper">
-            <i class="ph ph-magnifying-glass search-icon"></i>
-            <input type="text" id="searchInput" placeholder="Search by error message or symptoms..." onkeyup="renderList()">
+            <div class="search-input-container">
+                <i class="ph ph-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search by error message or symptoms..." onkeyup="renderList()">
+            </div>
+            <button class="btn btn-ai" onclick="performAISearch()" title="Use AI to find meaning" style="border-radius: 50px; padding: 0 20px;">
+                <i class="ph ph-sparkle"></i> Smart Search
+            </button>
         </div>
         <div id="approved-list"></div>
     </div>
 
     <div id="view-submit" class="hidden">
         <div style="text-align:center; margin-bottom:30px;">
-            <h3>Submit a New Fix</h3>
+            <h3 id="formTitle">Submit a New Fix</h3>
             <p style="color:#666;">Enter your rough notes below. Our AI will automatically format and polish them when you submit.</p>
         </div>
         
@@ -157,7 +164,7 @@
             <textarea id="inSteps" rows="5" placeholder="Just type what you did... e.g. 'i reset network settings then swapped sim'"></textarea>
             
             <div style="margin-top:20px; display:flex; gap:15px;">
-                <button class="btn btn-secondary" onclick="clearForm()" style="flex:1;">Clear</button>
+                <button class="btn btn-secondary" id="cancelBtn" onclick="clearForm()" style="flex:1;">Clear</button>
                 <button class="btn btn-primary" id="submitBtn" onclick="submitWithAI()" style="flex:3; justify-content:center;">
                     <i class="ph ph-magic-wand"></i> Polish & Submit
                 </button>
@@ -167,7 +174,7 @@
 
     <div id="view-moderate" class="hidden">
         <h3>Manager Queue</h3>
-        <p style="margin-bottom:20px; color:#666;">Review and approve rep submissions.</p>
+        <p style="margin-bottom:20px; color:#666;">Review, edit, and approve rep submissions.</p>
         <div id="pending-list"></div>
     </div>
 </div>
@@ -198,7 +205,8 @@
     const appId = 'default-app-id';
 
     let localWorkarounds = [];
-    let isManager = false; // Simple local check
+    let isManager = false; 
+    let editingId = null;
 
     // --- AUTH & DATA ---
     onAuthStateChanged(auth, (user) => {
@@ -228,6 +236,9 @@
             }
         }
         
+        // Reset Edit Mode if leaving
+        if(editingId && tabName !== 'submit') window.cancelEdit();
+
         ['search', 'submit', 'moderate'].forEach(t => {
             document.getElementById(`view-${t}`).classList.add('hidden');
             document.getElementById(`tab-${t}`).classList.remove('active');
@@ -237,7 +248,43 @@
         renderList();
     }
 
-    // --- SUBMISSION LOGIC (INTEGRATED AI) ---
+    // --- EDIT LOGIC (Restored) ---
+    window.editEntry = function(id) {
+        const item = localWorkarounds.find(i => i.id === id);
+        if(!item) return;
+
+        document.getElementById('inTitle').value = item.title;
+        document.getElementById('inDesc').value = item.desc;
+        document.getElementById('inSteps').value = item.steps;
+        
+        editingId = id;
+        document.getElementById('formTitle').innerText = "Edit Workaround";
+        document.getElementById('submitBtn').innerHTML = "Update Workaround";
+        document.getElementById('cancelBtn').innerText = "Cancel Edit";
+        document.getElementById('cancelBtn').onclick = window.cancelEdit;
+        
+        ['search', 'moderate'].forEach(t => {
+            document.getElementById(`view-${t}`).classList.add('hidden');
+            document.getElementById(`tab-${t}`).classList.remove('active');
+        });
+        document.getElementById('view-submit').classList.remove('hidden');
+    }
+
+    window.cancelEdit = function() {
+        editingId = null;
+        window.clearForm();
+        document.getElementById('formTitle').innerText = "Submit a New Fix";
+        document.getElementById('submitBtn').innerHTML = '<i class="ph ph-magic-wand"></i> Polish & Submit';
+        document.getElementById('cancelBtn').innerText = "Clear";
+        document.getElementById('cancelBtn').onclick = window.clearForm;
+        
+        // Go back to moderation
+        document.getElementById('view-submit').classList.add('hidden');
+        document.getElementById('view-moderate').classList.remove('hidden');
+        document.getElementById('tab-moderate').classList.add('active');
+    }
+
+    // --- SUBMISSION LOGIC ---
     window.submitWithAI = async function() {
         const title = document.getElementById('inTitle').value;
         const desc = document.getElementById('inDesc').value;
@@ -252,56 +299,70 @@
         let finalTitle = title;
         let finalDesc = desc;
         let finalSteps = steps;
+        let polished = false;
 
-        // 1. Call AI
-        try {
-            const prompt = `
-                You are an editor for a technical knowledge base.
-                Please rewrite this submission to be professional, clear, and concise.
-                
-                IMPORTANT: Format the 'steps' as a clear, bulleted list (using - or *).
-                
-                Input Title: ${title}
-                Input Desc: ${desc}
-                Input Steps: ${steps}
+        // 1. Call AI (Only if submitting new or user wants re-polish, but we do it by default on submit)
+        // If editing, we assume manager might want to preserve their manual edits, 
+        // but for now, we will run polish ONLY if it's a new submission to be safe.
+        if (!editingId) {
+             try {
+                const prompt = `
+                    You are an editor for a technical knowledge base.
+                    Please rewrite this submission to be professional, clear, and concise.
+                    IMPORTANT: Format the 'steps' as a clear, bulleted list (using - or *).
+                    
+                    Input Title: ${title}
+                    Input Desc: ${desc}
+                    Input Steps: ${steps}
 
-                Return JSON: { "title": "...", "desc": "...", "steps": "..." }
-            `;
+                    Return JSON: { "title": "...", "desc": "...", "steps": "..." }
+                `;
 
-            const response = await fetch("/.netlify/functions/ai", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ messages: [{ role: "user", content: prompt }] })
-            });
+                const response = await fetch("/.netlify/functions/ai", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: [{ role: "user", content: prompt }] })
+                });
 
-            if(response.ok) {
-                const data = await response.json();
-                const content = JSON.parse(data.choices[0].message.content);
-                finalTitle = content.title;
-                finalDesc = content.desc;
-                finalSteps = content.steps;
-            } else {
-                console.warn("AI skipped due to error, submitting raw.");
+                if(response.ok) {
+                    const data = await response.json();
+                    const content = JSON.parse(data.choices[0].message.content);
+                    finalTitle = content.title;
+                    finalDesc = content.desc;
+                    finalSteps = content.steps;
+                    polished = true;
+                }
+            } catch (e) {
+                console.error("AI Error", e);
             }
-        } catch (e) {
-            console.error("AI Error", e);
         }
 
         // 2. Save to Firebase
         try {
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'workarounds'), {
-                title: finalTitle,
-                desc: finalDesc,
-                steps: finalSteps,
-                status: "pending",
-                createdAt: new Date().toISOString(),
-                aiPolished: true
-            });
-            
+            if (editingId) {
+                // Update existing
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', editingId), {
+                    title: finalTitle,
+                    desc: finalDesc,
+                    steps: finalSteps
+                });
+                alert("Workaround updated successfully!");
+                window.cancelEdit();
+            } else {
+                // Create new
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'workarounds'), {
+                    title: finalTitle,
+                    desc: finalDesc,
+                    steps: finalSteps,
+                    status: "pending",
+                    createdAt: new Date().toISOString(),
+                    aiPolished: polished
+                });
+                alert("Success! Your fix has been polished and sent to the manager queue.");
+                window.clearForm();
+                window.switchTab('search');
+            }
             overlay.classList.add('hidden');
-            alert("Success! Your fix has been polished and sent to the manager queue.");
-            window.clearForm();
-            window.switchTab('search');
             
         } catch (e) {
             overlay.classList.add('hidden');
@@ -315,9 +376,54 @@
         document.getElementById('inSteps').value = '';
     }
 
+    // --- SMART SEARCH (Restored) ---
+    window.performAISearch = async function() {
+        const query = document.getElementById('searchInput').value;
+        if(!query) return alert("Please enter a search term first.");
+
+        const btn = document.querySelector('.btn-ai');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Thinking...';
+        
+        const corpus = localWorkarounds
+            .filter(i => i.status === 'approved')
+            .map(i => ({ id: i.id, title: i.title, desc: i.desc }));
+
+        try {
+            const prompt = `
+                You are a support assistant. User Query: "${query}"
+                Database: ${JSON.stringify(corpus)}
+                Return a JSON object with a key "matchIds" containing an array of IDs for the items that best answer the user's query. 
+                Return: { "matchIds": ["id1", "id2"] }
+            `;
+
+            const response = await fetch("/.netlify/functions/ai", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ messages: [{ role: "user", content: prompt }] })
+            });
+
+            if(response.ok) {
+                const data = await response.json();
+                const content = JSON.parse(data.choices[0].message.content);
+                if (content && content.matchIds) {
+                    const aiFilteredList = localWorkarounds.filter(item => content.matchIds.includes(item.id));
+                    window.renderList(aiFilteredList);
+                }
+            }
+        } catch(e) {
+            console.error(e);
+            alert("AI Search failed. Using standard search.");
+            window.renderList();
+        }
+        btn.innerHTML = originalText;
+    }
+
     // --- RENDER LOGIC ---
-    window.renderList = function() {
+    window.renderList = function(customList = null) {
+        const listToRender = customList || localWorkarounds;
         const searchVal = document.getElementById('searchInput').value.toLowerCase();
+        
         const approvedContainer = document.getElementById('approved-list');
         const pendingContainer = document.getElementById('pending-list');
         
@@ -326,17 +432,18 @@
         
         let pendingCount = 0;
 
-        localWorkarounds.forEach(item => {
-            // Manager Queue
-            if (item.status === 'pending') {
-                pendingCount++;
-                pendingContainer.innerHTML += createCard(item, true);
-            } 
-            // Public Search
-            else if (item.status === 'approved') {
-                if (item.title.toLowerCase().includes(searchVal) || item.desc.toLowerCase().includes(searchVal)) {
-                    approvedContainer.innerHTML += createCard(item, false);
-                }
+        // Render Pending (Only if Manager)
+        const pendingItems = localWorkarounds.filter(i => i.status === 'pending');
+        pendingItems.forEach(item => {
+            pendingCount++;
+            pendingContainer.innerHTML += createCard(item, true);
+        });
+
+        // Render Approved
+        const approvedItems = listToRender.filter(i => i.status === 'approved');
+        approvedItems.forEach(item => {
+            if (customList || item.title.toLowerCase().includes(searchVal) || item.desc.toLowerCase().includes(searchVal)) {
+                approvedContainer.innerHTML += createCard(item, false);
             }
         });
 
@@ -345,7 +452,6 @@
     }
 
     function createCard(item, isPending) {
-        // Convert markdown bullets to HTML breaks for display if needed, or rely on pre-wrap
         return `
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:start;">
@@ -356,6 +462,7 @@
                 <div class="steps" style="white-space: pre-wrap;">${item.steps}</div>
                 ${isPending ? `
                     <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px; display:flex; gap:10px;">
+                        <button class="btn btn-secondary" style="font-size:13px; padding:8px 16px;" onclick="editEntry('${item.id}')">Edit</button>
                         <button class="btn btn-success" style="font-size:13px; padding:8px 16px;" onclick="approve('${item.id}')">Approve</button>
                         <button class="btn btn-danger" style="font-size:13px; padding:8px 16px;" onclick="reject('${item.id}')">Reject</button>
                     </div>` : ''}

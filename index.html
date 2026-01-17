@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Workaround Hub</title>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"></script>
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         :root { --primary: #0056b3; --accent: #e9ecef; --text: #333; --ai: #7c3aed; }
@@ -60,7 +58,6 @@
         <span style="font-size: 0.8em; color: #888;">Production System</span>
     </div>
 
-    <!-- Navigation -->
     <div class="nav-tabs">
         <button onclick="switchTab('search')" class="active" id="tab-search"><i class="ph ph-magnifying-glass"></i> Find Fixes</button>
         <button onclick="switchTab('submit')" id="tab-submit"><i class="ph ph-plus-circle"></i> Submit New</button>
@@ -69,7 +66,6 @@
 
     <div id="loading">Connecting to database...</div>
 
-    <!-- VIEW 1: Search & Display -->
     <div id="view-search" class="hidden">
         <div class="search-wrapper">
             <input type="text" id="searchInput" placeholder="Search issues (e.g. 'ship flow')..." onkeyup="handleSearchKeyup(event)">
@@ -80,7 +76,6 @@
         <div id="approved-list"></div>
     </div>
 
-    <!-- VIEW 2: Submission Form -->
     <div id="view-submit" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 id="formTitle">Submit a Workaround</h3>
@@ -107,7 +102,6 @@
         </div>
     </div>
 
-    <!-- VIEW 3: Moderation (Manager Only) -->
     <div id="view-moderate" class="hidden">
         <h3>Pending Approvals</h3>
         <p>Review rep submissions before they go live.</p>
@@ -126,7 +120,7 @@
     // ==========================================
     
     const firebaseConfig = {
-        apiKey: "",
+        apiKey: "AIzaSyBI7Bf9nLzdcT3CRcz7bFjnOEGyN5Y_EWI",
         authDomain: "xm-errors-tool.firebaseapp.com",
         projectId: "xm-errors-tool",
         storageBucket: "xm-errors-tool.firebasestorage.app",

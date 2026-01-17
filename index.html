@@ -7,7 +7,6 @@
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -275,7 +274,7 @@
 <div id="password-modal" class="hidden">
     <div class="modal-content">
         <i class="ph ph-lock-key" style="font-size:32px; color:var(--primary); margin-bottom:15px;"></i>
-        <h3 style="margin:0 0 15px;">Manager Access</h3>
+        <h3 id="modal-title" style="margin:0 0 15px;">Manager Access</h3>
         <input type="password" id="mgr-pwd" placeholder="Enter Password" style="margin-bottom:15px; text-align:center;">
         <button class="btn btn-primary" onclick="verifyManager()">Unlock</button>
         <button style="background:none; border:none; color:#64748b; margin-top:15px; cursor:pointer;" onclick="closeModal()">Cancel</button>
@@ -306,7 +305,9 @@
     let localWorkarounds = []; 
     let currentUser = null;
     let editingId = null; 
-    let isManager = false; // Simple session flag
+    let isManager = false; 
+    let authIntent = 'LOGIN'; // 'LOGIN' or 'DELETE'
+    let itemToDelete = null;
 
     // 2. AUTH & INIT
     async function initApp() {
@@ -342,7 +343,7 @@
         });
     }
 
-    // 3. UI NAVIGATION & MANAGER GATE
+    // 3. NAVIGATION & SECURITY
     window.switchTab = function(tabName) {
         document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.nav-tabs button').forEach(el => el.classList.remove('active'));
@@ -352,29 +353,53 @@
         renderList();
     }
 
+    // --- Manager Access (Login or Delete) ---
     window.checkManagerAccess = function() {
         if (isManager) {
             switchTab('moderate');
         } else {
+            authIntent = 'LOGIN';
+            document.getElementById('modal-title').innerText = "Manager Access";
             document.getElementById('password-modal').classList.remove('hidden');
             document.getElementById('mgr-pwd').focus();
         }
     }
 
-    window.verifyManager = function() {
+    window.initiateDelete = function(id) {
+        authIntent = 'DELETE';
+        itemToDelete = id;
+        document.getElementById('modal-title').innerText = "Confirm Deletion";
+        document.getElementById('password-modal').classList.remove('hidden');
+        document.getElementById('mgr-pwd').focus();
+    }
+
+    window.verifyManager = async function() {
         const input = document.getElementById('mgr-pwd').value;
-        if (input === 'xm360') { // Simple Password
-            isManager = true;
+        const pwdField = document.getElementById('mgr-pwd');
+        
+        if (input === 'xm360') { // Default Password
+            if (authIntent === 'LOGIN') {
+                isManager = true;
+                switchTab('moderate');
+            } 
+            else if (authIntent === 'DELETE' && itemToDelete) {
+                if(confirm("Are you sure? This cannot be undone.")) {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', itemToDelete));
+                }
+                itemToDelete = null;
+            }
             closeModal();
-            switchTab('moderate');
-            document.getElementById('mgr-pwd').value = '';
         } else {
             alert("Incorrect password");
+            pwdField.value = '';
+            pwdField.focus();
         }
     }
 
     window.closeModal = function() {
         document.getElementById('password-modal').classList.add('hidden');
+        document.getElementById('mgr-pwd').value = '';
+        authIntent = 'LOGIN';
     }
 
     window.logoutManager = function() {
@@ -382,7 +407,7 @@
         switchTab('search');
     }
 
-    // 4. RENDERING (Updated for HTML/Rich Text)
+    // 4. RENDERING
     window.renderList = function(customList = null) {
         const listToRender = customList || localWorkarounds;
         const searchVal = document.getElementById('searchInput').value.toLowerCase();
@@ -415,11 +440,16 @@
     }
 
     function createCard(item) {
-        // NOTE: item.steps is now rendered as innerHTML to support bullets and links
+        // Includes Delete button for approved items (triggers PW modal)
         return `
             <div class="card ${item.status === 'pending' ? 'pending' : ''}">
                 <div style="display:flex; justify-content:space-between; align-items:start;">
                     <h3>${item.title}</h3>
+                    ${item.status === 'approved' ? 
+                        `<button onclick="initiateDelete('${item.id}')" title="Delete Item" style="background:none; border:none; color:#cbd5e1; cursor:pointer; transition:color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'">
+                            <i class="ph ph-trash" style="font-size:18px;"></i>
+                         </button>` 
+                    : ''}
                 </div>
                 <p>${item.desc}</p>
                 <div class="steps">${item.steps}</div>
@@ -441,12 +471,10 @@
 
         if(!title || !rawSteps) return alert("Please fill in the Title and Steps.");
 
-        // UI: Show loading overlay
         document.getElementById('submit-overlay').classList.remove('hidden');
 
         let finalData = { title, desc, steps: rawSteps };
 
-        // AI CALL
         try {
             const prompt = `
                 You are a technical documentation editor.
@@ -465,18 +493,16 @@
 
             const aiResult = await callGroq([{ role: "user", content: prompt }]);
             if (aiResult) {
-                finalData = aiResult; // Use the polished version
+                finalData = aiResult; 
             }
         } catch (e) {
             console.warn("AI Polish failed, submitting raw data", e);
         }
 
-        // FIREBASE SUBMIT
         try {
             if (editingId) {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', editingId), {
-                    ...finalData,
-                    status: "approved" // Manager edits auto-approve? Let's keep existing status to be safe, or default to pending.
+                    ...finalData
                 });
                 alert("Updated successfully!");
                 cancelEdit(); 
@@ -487,12 +513,10 @@
                     createdAt: new Date().toISOString(),
                     authorId: currentUser.uid
                 });
-                // Reset form
                 document.getElementById('inTitle').value = '';
                 document.getElementById('inDesc').value = '';
                 document.getElementById('inSteps').value = '';
                 switchTab('search');
-                // Brief success notification could go here
             }
         } catch (e) {
             console.error(e);
@@ -502,15 +526,14 @@
         }
     }
 
-    // 6. EDITING & MODERATION
+    // 6. EDITING
     window.editEntry = function(id) {
         const item = localWorkarounds.find(i => i.id === id);
         if(!item) return;
 
-        // Strip HTML for the edit box so it's readable
         const tmp = document.createElement("DIV");
         tmp.innerHTML = item.steps;
-        let plainSteps = tmp.innerText; // Basic conversion back to text
+        let plainSteps = tmp.innerText; 
 
         document.getElementById('inTitle').value = item.title;
         document.getElementById('inDesc').value = item.desc;

@@ -3,109 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Workaround Hub</title>
+    <title>XM360 Error Workarounds</title>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0056b3; --accent: #e9ecef; --text: #333; --ai: #7c3aed; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; color: var(--text); padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
-        
+        :root { 
+            --primary: #6366f1; 
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --bg: #f8fafc; 
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text: #1e293b; 
+            --glass: rgba(255, 255, 255, 0.7);
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #e0e7ff 0%, #fae8ff 100%);
+            color: var(--text); 
+            padding: 20px; 
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 850px; 
+            margin: 0 auto; 
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(255,255,255,0.5);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        h1 {
+            background: linear-gradient(to right, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            margin: 0;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+        }
+
         /* Navigation */
-        .nav-tabs { display: flex; border-bottom: 2px solid var(--accent); margin-bottom: 20px; }
-        .nav-tabs button { background: none; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; color: #666; display: flex; align-items: center; gap: 8px; }
-        .nav-tabs button.active { border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: bold; margin-bottom: -2px; }
+        .nav-tabs { 
+            display: flex; 
+            background: rgba(255,255,255,0.5);
+            padding: 5px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-tabs button { 
+            flex: 1;
+            background: none; 
+            border: none; 
+            padding: 12px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 600;
+            color: #64748b; 
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+            gap: 8px; 
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-tabs button:hover { background: rgba(255,255,255,0.5); }
+        .nav-tabs button.active { 
+            background: white; 
+            color: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
         
         /* Forms & Inputs */
-        input, textarea, select { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        input:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,86,179,0.1); }
+        input, textarea { 
+            width: 100%; 
+            padding: 15px; 
+            margin-top: 8px; 
+            margin-bottom: 20px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            font-size: 15px; 
+            font-family: inherit;
+            background: rgba(255,255,255,0.8);
+            transition: all 0.2s;
+        }
+        input:focus, textarea:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); 
+        }
         
-        button.btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.1s; }
+        label { font-weight: 600; font-size: 0.9rem; color: #475569; margin-left: 4px; }
+
+        /* Buttons */
+        button.btn { 
+            padding: 14px 24px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 8px; 
+            transition: transform 0.1s, box-shadow 0.2s; 
+            font-size: 1rem;
+        }
         button.btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-ai { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .btn-success { background: #10b981; color: white; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            width: 100%;
+        }
+        .btn-primary:hover { box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4); }
         
-        /* Search Bar Area */
-        .search-wrapper { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-wrapper input { margin: 0; }
+        .btn-ai-search { 
+            background: white; 
+            color: var(--primary); 
+            border: 2px solid #e2e8f0;
+        }
+        .btn-ai-search:hover { border-color: var(--primary); background: #fdfeff; }
+
+        .btn-success { background: #10b981; color: white; padding: 8px 16px; font-size: 0.9rem; }
+        .btn-danger { background: #ef4444; color: white; padding: 8px 16px; font-size: 0.9rem; }
+        .btn-secondary { background: #cbd5e1; color: #475569; padding: 8px 16px; font-size: 0.9rem; }
         
         /* Cards */
-        .card { border: 1px solid #eee; padding: 20px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid var(--primary); background: white; transition: box-shadow 0.2s; }
-        .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card.pending { border-left-color: #f59e0b; background-color: #fffbf0; }
-        .card h3 { margin-top: 0; color: var(--primary); margin-bottom: 5px; }
-        .steps { white-space: pre-wrap; background: #f8f9fa; padding: 15px; border-radius: 6px; font-family: monospace; border: 1px solid #e9ecef; margin-top: 10px; }
+        .card { 
+            border: none; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            border-radius: 16px; 
+            background: white; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s; 
+            animation: fadeIn 0.4s ease forwards;
+            opacity: 0;
+            border-left: 6px solid var(--primary);
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .card.pending { border-left-color: #f59e0b; background: #fffbeb; }
         
-        .hidden { display: none; }
-        #loading { text-align: center; color: #666; padding: 20px; }
+        .card h3 { margin-top: 0; color: #1e293b; margin-bottom: 8px; font-size: 1.2rem; }
+        .card p { color: #64748b; margin-top: 0; line-height: 1.5; }
+
+        /* Rich Content Styles (Replacing pre-wrap) */
+        .steps { 
+            margin-top: 15px; 
+            padding: 15px 20px; 
+            background: #f1f5f9; 
+            border-radius: 12px; 
+            color: #334155;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .steps ul { margin: 0; padding-left: 20px; }
+        .steps li { margin-bottom: 6px; }
+        .steps a { color: var(--primary); text-decoration: none; font-weight: 600; border-bottom: 1px dotted var(--primary); }
+        .steps a:hover { border-bottom-style: solid; }
+
+        .search-wrapper { display: flex; gap: 12px; margin-bottom: 25px; }
+        .search-wrapper input { margin: 0; }
         
-        /* AI Loading State */
-        .ai-processing { opacity: 0.6; pointer-events: none; position: relative; }
-        .ai-processing::after { content: "✨ AI working..."; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: black; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
+        .hidden { display: none !important; }
+        
+        /* Processing State */
+        .processing-overlay {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 24px;
+        }
+        .spinner { font-size: 2rem; color: var(--primary); animation: spin 1s linear infinite; }
+
+        /* Password Modal */
+        #password-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 16px; width: 300px;
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div style="margin-bottom: 20px;">
-        <h1>Mobile Ops Knowledge Base</h1>
-        <span style="font-size: 0.8em; color: #888;">Production System</span>
+    <div style="margin-bottom: 30px; text-align: center;">
+        <h1>XM360 Error Workarounds</h1>
     </div>
 
     <div class="nav-tabs">
         <button onclick="switchTab('search')" class="active" id="tab-search"><i class="ph ph-magnifying-glass"></i> Find Fixes</button>
         <button onclick="switchTab('submit')" id="tab-submit"><i class="ph ph-plus-circle"></i> Submit New</button>
-        <button onclick="switchTab('moderate')" id="tab-moderate"><i class="ph ph-shield-check"></i> Queue <span id="badge" style="background:var(--primary); color:white; padding:2px 6px; border-radius:10px; font-size:10px; margin-left:5px;">0</span></button>
+        <button onclick="checkManagerAccess()" id="tab-moderate"><i class="ph ph-lock-key"></i> Queue <span id="badge" style="background:var(--secondary); color:white; padding:2px 8px; border-radius:10px; font-size:11px; margin-left:6px; font-weight:bold;">0</span></button>
     </div>
 
-    <div id="loading">Connecting to database...</div>
+    <div id="loading" style="text-align:center; padding:40px; color:#64748b;">
+        <i class="ph ph-circle-notch ph-spin" style="font-size:24px;"></i><br>Loading Database...
+    </div>
 
     <div id="view-search" class="hidden">
         <div class="search-wrapper">
-            <input type="text" id="searchInput" placeholder="Search issues (e.g. 'ship flow')..." onkeyup="handleSearchKeyup(event)">
-            <button class="btn btn-ai" onclick="performAISearch()" title="Use AI to find meaning, not just keywords">
+            <input type="text" id="searchInput" placeholder="Search error codes or symptoms..." onkeyup="handleSearchKeyup(event)">
+            <button class="btn btn-ai-search" onclick="performAISearch()">
                 <i class="ph ph-sparkle"></i> Smart Search
             </button>
         </div>
         <div id="approved-list"></div>
     </div>
 
-    <div id="view-submit" class="hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 id="formTitle">Submit a Workaround</h3>
-            <button class="btn btn-ai" onclick="aiPolish()" id="polishBtn">
-                <i class="ph ph-magic-wand"></i> AI Polish
-            </button>
+    <div id="view-submit" class="hidden" style="position: relative;">
+        <div id="submit-overlay" class="processing-overlay hidden">
+            <i class="ph ph-magic-wand spinner"></i>
+            <h3 style="margin:15px 0 5px;">AI is Polishing...</h3>
+            <p style="color:#64748b;">Fixing typos & formatting hyperlinks</p>
         </div>
-        <p style="color:#666; font-size:0.9em; margin-bottom:20px;">Write your rough notes below, then hit <strong>AI Polish</strong> to clean up typos and formatting before submitting.</p>
+
+        <div style="text-align: center; margin-bottom: 25px;">
+            <h2 id="formTitle" style="margin:0; color:var(--primary-dark);">Submit a Workaround</h2>
+            <p style="color:#64748b; margin-top:5px;">Write rough notes. We'll clean it up automatically.</p>
+        </div>
         
         <div id="form-content">
-            <label><strong>Issue / Error Name</strong></label>
-            <input type="text" id="inTitle" placeholder="e.g., Order forces 'Bypass to ship flow'">
+            <label>Error Name</label>
+            <input type="text" id="inTitle" placeholder="e.g., Order stuck in Bypass Flow">
             
-            <label><strong>Description (Symptoms)</strong></label>
-            <textarea id="inDesc" rows="2" placeholder="What does the error look like?"></textarea>
+            <label>Symptoms / Description</label>
+            <textarea id="inDesc" rows="2" placeholder="What does the user see?"></textarea>
             
-            <label><strong>The Fix (Step-by-step)</strong></label>
-            <textarea id="inSteps" rows="5" placeholder="1. Clear cache on iPad&#10;2. Sign out everywhere..."></textarea>
+            <label>Rough Steps (Paste links here)</label>
+            <textarea id="inSteps" rows="6" placeholder="- clear cache&#10;- go to https://example.com/tool&#10;- click reset"></textarea>
             
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-secondary hidden" id="cancelEditBtn" onclick="cancelEdit()" style="flex:1;">Cancel</button>
-                <button class="btn btn-primary" id="submitBtn" onclick="submitEntry()" style="flex:2; justify-content:center;">Submit for Review</button>
+            <div style="display:flex; gap:15px; margin-top:10px;">
+                <button class="btn btn-secondary hidden" id="cancelEditBtn" onclick="cancelEdit()" style="flex:1;">Cancel Edit</button>
+                <button class="btn btn-primary" id="submitBtn" onclick="polishAndSubmit()">
+                    <i class="ph ph-magic-wand"></i> Polish & Submit
+                </button>
             </div>
         </div>
     </div>
 
     <div id="view-moderate" class="hidden">
-        <h3>Pending Approvals</h3>
-        <p>Review rep submissions before they go live.</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3>Pending Approvals</h3>
+            <button onclick="logoutManager()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.9rem;">Lock Queue</button>
+        </div>
         <div id="pending-list"></div>
+    </div>
+</div>
+
+<div id="password-modal" class="hidden">
+    <div class="modal-content">
+        <i class="ph ph-lock-key" style="font-size:32px; color:var(--primary); margin-bottom:15px;"></i>
+        <h3 style="margin:0 0 15px;">Manager Access</h3>
+        <input type="password" id="mgr-pwd" placeholder="Enter Password" style="margin-bottom:15px; text-align:center;">
+        <button class="btn btn-primary" onclick="verifyManager()">Unlock</button>
+        <button style="background:none; border:none; color:#64748b; margin-top:15px; cursor:pointer;" onclick="closeModal()">Cancel</button>
     </div>
 </div>
 
@@ -113,12 +286,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
-    // ==========================================
-    // 1. PRODUCTION CONFIGURATION
-    // ==========================================
-    
+    // 1. CONFIGURATION
     const firebaseConfig = {
         apiKey: "AIzaSyBI7Bf9nLzdcT3CRcz7bFjnOEGyN5Y_EWI",
         authDomain: "xm-errors-tool.firebaseapp.com",
@@ -130,145 +299,90 @@
     };
 
     const appId = (typeof __app_id !== 'undefined') ? __app_id : 'default-app-id';
-    
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    
-    try {
-        const analytics = getAnalytics(app);
-    } catch (e) {
-        console.log("Analytics initialized.");
-    }
 
     let localWorkarounds = []; 
     let currentUser = null;
     let editingId = null; 
-    let dataListenerSetup = false;
+    let isManager = false; // Simple session flag
 
-    // ==========================================
-    // 2. Auth & Data
-    // ==========================================
+    // 2. AUTH & INIT
     async function initApp() {
-        // 0. Safety Timeout: If it hangs for 8 seconds, force a UI update
-        setTimeout(() => {
-            const loading = document.getElementById('loading');
-            if (loading && !loading.classList.contains('hidden')) {
-                // If we're stuck, just hide loading so user can at least see empty state
-                // loading.classList.add('hidden');
-                // document.getElementById('view-search').classList.remove('hidden');
-                loading.innerHTML = '<div style="color:#666">Connecting is taking longer than usual... <br><button class="btn btn-secondary" onclick="location.reload()" style="margin-top:10px;">Reload App</button></div>';
-            }
-        }, 8000);
-
-        // 1. Setup Auth Listener
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                if (!dataListenerSetup) {
-                    setupDataListener();
-                }
+                setupDataListener();
             }
         });
 
-        // 2. Trigger Login ONLY if needed
         if (!auth.currentUser) {
-            await doLogin();
-        }
-    }
-
-    async function doLogin() {
-        try {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        } catch (error) {
-            console.error("Auth failed:", error);
-            
-            let errorMsg = "Unable to connect to authentication service.";
-            if (error.code === 'auth/operation-not-allowed') {
-                errorMsg = "System configuration error: Authentication method disabled.";
-            }
-
-            document.getElementById('loading').innerHTML = `
-                <div style="color:#dc3545; background:#fff5f5; padding:15px; border-radius:8px; border:1px solid #ffc9c9;">
-                    <strong>Connection Failed</strong><br>
-                    <span style="font-size:0.9em;">${errorMsg}</span>
-                </div>
-            `;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) { console.error("Auth failed:", error); }
         }
     }
 
     function setupDataListener() {
-        dataListenerSetup = true;
         const fixesRef = collection(db, 'artifacts', appId, 'public', 'data', 'workarounds');
-        
         onSnapshot(fixesRef, (snapshot) => {
-            localWorkarounds = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            
+            localWorkarounds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             document.getElementById('loading').classList.add('hidden');
-            document.getElementById('view-search').classList.remove('hidden'); 
+            if(document.getElementById('view-search').classList.contains('hidden') && 
+               document.getElementById('view-submit').classList.contains('hidden') &&
+               document.getElementById('view-moderate').classList.contains('hidden')) {
+                document.getElementById('view-search').classList.remove('hidden');
+            }
             renderList();
-        }, (error) => {
-            console.error("Firestore Error:", error);
-            document.getElementById('loading').innerHTML = `
-                <div style="color:#dc3545;">
-                    <strong>Access Denied</strong><br>
-                    ${error.code === 'permission-denied' ? 'You do not have permission to view these records.' : 'System error loading data.'}
-                </div>`;
         });
     }
 
-    // ==========================================
-    // 3. UI Helpers
-    // ==========================================
+    // 3. UI NAVIGATION & MANAGER GATE
     window.switchTab = function(tabName) {
-        ['search', 'submit', 'moderate'].forEach(t => {
-            document.getElementById(`view-${t}`).classList.add('hidden');
-            document.getElementById(`tab-${t}`).classList.remove('active');
-        });
+        document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.nav-tabs button').forEach(el => el.classList.remove('active'));
+        
         document.getElementById(`view-${tabName}`).classList.remove('hidden');
         document.getElementById(`tab-${tabName}`).classList.add('active');
         renderList();
     }
 
-    window.editEntry = function(id) {
-        const item = localWorkarounds.find(i => i.id === id);
-        if(!item) return;
-
-        document.getElementById('inTitle').value = item.title;
-        document.getElementById('inDesc').value = item.desc;
-        document.getElementById('inSteps').value = item.steps;
-        
-        editingId = id;
-        document.getElementById('formTitle').innerText = "Edit Workaround";
-        document.getElementById('submitBtn').innerText = "Update Workaround";
-        document.getElementById('cancelEditBtn').classList.remove('hidden');
-        
-        window.switchTab('submit');
+    window.checkManagerAccess = function() {
+        if (isManager) {
+            switchTab('moderate');
+        } else {
+            document.getElementById('password-modal').classList.remove('hidden');
+            document.getElementById('mgr-pwd').focus();
+        }
     }
 
-    window.cancelEdit = function() {
-        editingId = null;
-        document.getElementById('inTitle').value = '';
-        document.getElementById('inDesc').value = '';
-        document.getElementById('inSteps').value = '';
-        
-        document.getElementById('formTitle').innerText = "Submit a Workaround";
-        document.getElementById('submitBtn').innerText = "Submit for Review";
-        document.getElementById('cancelEditBtn').classList.add('hidden');
-        window.switchTab('moderate');
+    window.verifyManager = function() {
+        const input = document.getElementById('mgr-pwd').value;
+        if (input === 'xm360') { // Simple Password
+            isManager = true;
+            closeModal();
+            switchTab('moderate');
+            document.getElementById('mgr-pwd').value = '';
+        } else {
+            alert("Incorrect password");
+        }
     }
 
-    // ==========================================
-    // 4. Render Logic
-    // ==========================================
+    window.closeModal = function() {
+        document.getElementById('password-modal').classList.add('hidden');
+    }
+
+    window.logoutManager = function() {
+        isManager = false;
+        switchTab('search');
+    }
+
+    // 4. RENDERING (Updated for HTML/Rich Text)
     window.renderList = function(customList = null) {
         const listToRender = customList || localWorkarounds;
         const searchVal = document.getElementById('searchInput').value.toLowerCase();
@@ -280,171 +394,170 @@
         pendingContainer.innerHTML = '';
         let pendingCount = 0;
 
-        const pendingItems = localWorkarounds.filter(i => i.status === 'pending');
-        pendingItems.forEach(item => {
+        // Pending
+        localWorkarounds.filter(i => i.status === 'pending').forEach(item => {
             pendingContainer.innerHTML += createCard(item);
             pendingCount++;
         });
 
-        const approvedItems = listToRender.filter(i => i.status === 'approved');
-        approvedItems.forEach(item => {
+        // Approved
+        listToRender.filter(i => i.status === 'approved').forEach(item => {
             if (customList || item.title.toLowerCase().includes(searchVal) || item.desc.toLowerCase().includes(searchVal)) {
                 approvedContainer.innerHTML += createCard(item);
             }
         });
 
-        document.getElementById('badge').innerText = pendingCount;
-        if(pendingCount === 0) pendingContainer.innerHTML = '<p class="text-gray-500">No pending submissions.</p>';
-        if(approvedContainer.innerHTML === '') approvedContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">No fixes found.</p>';
+        const badge = document.getElementById('badge');
+        badge.innerText = pendingCount;
+        badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+
+        if(approvedContainer.innerHTML === '') approvedContainer.innerHTML = '<div style="text-align:center; margin-top:40px; color:#94a3b8;"><i class="ph ph-ghost" style="font-size:32px;"></i><p>No matches found.</p></div>';
     }
 
     function createCard(item) {
+        // NOTE: item.steps is now rendered as innerHTML to support bullets and links
         return `
             <div class="card ${item.status === 'pending' ? 'pending' : ''}">
-                <div style="display:flex; justify-content:space-between;">
+                <div style="display:flex; justify-content:space-between; align-items:start;">
                     <h3>${item.title}</h3>
-                    ${item.aiPolished ? '<span title="AI Polished" style="font-size:12px; background:#f3e8ff; color:#7c3aed; padding:2px 8px; border-radius:10px; height:fit-content;">✨ AI</span>' : ''}
                 </div>
-                <p><em>${item.desc}</em></p>
+                <p>${item.desc}</p>
                 <div class="steps">${item.steps}</div>
                 ${item.status === 'pending' ? `
-                    <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:flex; gap:10px;">
-                        <button class="btn btn-secondary" style="font-size:0.9em; padding:5px 10px;" onclick="editEntry('${item.id}')">Edit</button>
-                        <button class="btn btn-success" style="font-size:0.9em; padding:5px 10px;" onclick="approve('${item.id}')">Approve</button>
-                        <button class="btn btn-danger" style="font-size:0.9em; padding:5px 10px;" onclick="reject('${item.id}')">Reject</button>
+                    <div style="margin-top:20px; border-top:1px solid #e2e8f0; padding-top:15px; display:flex; gap:10px;">
+                        <button class="btn btn-secondary" onclick="editEntry('${item.id}')">Edit</button>
+                        <button class="btn btn-success" onclick="approve('${item.id}')">Approve</button>
+                        <button class="btn btn-danger" onclick="reject('${item.id}')">Reject</button>
                     </div>` : ''}
             </div>
         `;
     }
 
-    // ==========================================
-    // 5. Database Actions
-    // ==========================================
-    window.submitEntry = async function() {
+    // 5. MERGED WORKFLOW: POLISH & SUBMIT
+    window.polishAndSubmit = async function() {
         const title = document.getElementById('inTitle').value;
         const desc = document.getElementById('inDesc').value;
-        const steps = document.getElementById('inSteps').value;
-        const isPolished = document.getElementById('inSteps').dataset.polished === 'true';
+        const rawSteps = document.getElementById('inSteps').value;
 
-        if(!title || !steps) return alert("Please fill in the Title and Steps.");
+        if(!title || !rawSteps) return alert("Please fill in the Title and Steps.");
 
+        // UI: Show loading overlay
+        document.getElementById('submit-overlay').classList.remove('hidden');
+
+        let finalData = { title, desc, steps: rawSteps };
+
+        // AI CALL
+        try {
+            const prompt = `
+                You are a technical documentation editor.
+                1. Fix typos in the Title, Description, and Steps.
+                2. Format 'steps' strictly as HTML using <ul> and <li> tags.
+                3. Detect any URLs in the text and wrap them in <a href="..." target="_blank"> tags.
+                4. Keep the tone professional and concise.
+                
+                Input:
+                Title: ${title}
+                Desc: ${desc}
+                Steps: ${rawSteps}
+
+                Return JSON: { "title": "...", "desc": "...", "steps": "..." }
+            `;
+
+            const aiResult = await callGroq([{ role: "user", content: prompt }]);
+            if (aiResult) {
+                finalData = aiResult; // Use the polished version
+            }
+        } catch (e) {
+            console.warn("AI Polish failed, submitting raw data", e);
+        }
+
+        // FIREBASE SUBMIT
         try {
             if (editingId) {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', editingId), {
-                    title: title,
-                    desc: desc,
-                    steps: steps,
-                    aiPolished: isPolished
+                    ...finalData,
+                    status: "approved" // Manager edits auto-approve? Let's keep existing status to be safe, or default to pending.
                 });
-                alert("Workaround updated successfully!");
-                window.cancelEdit(); 
+                alert("Updated successfully!");
+                cancelEdit(); 
             } else {
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'workarounds'), {
-                    title: title,
-                    desc: desc,
-                    steps: steps,
+                    ...finalData,
                     status: "pending",
                     createdAt: new Date().toISOString(),
-                    authorId: currentUser.uid,
-                    aiPolished: isPolished
+                    authorId: currentUser.uid
                 });
-                alert("Submitted for review!");
+                // Reset form
                 document.getElementById('inTitle').value = '';
                 document.getElementById('inDesc').value = '';
                 document.getElementById('inSteps').value = '';
-                document.getElementById('inSteps').dataset.polished = 'false';
-                window.switchTab('search');
+                switchTab('search');
+                // Brief success notification could go here
             }
         } catch (e) {
-            console.error("Error saving document: ", e);
-            alert("Error saving. Please try again.");
+            console.error(e);
+            alert("Error saving data.");
+        } finally {
+            document.getElementById('submit-overlay').classList.add('hidden');
         }
+    }
+
+    // 6. EDITING & MODERATION
+    window.editEntry = function(id) {
+        const item = localWorkarounds.find(i => i.id === id);
+        if(!item) return;
+
+        // Strip HTML for the edit box so it's readable
+        const tmp = document.createElement("DIV");
+        tmp.innerHTML = item.steps;
+        let plainSteps = tmp.innerText; // Basic conversion back to text
+
+        document.getElementById('inTitle').value = item.title;
+        document.getElementById('inDesc').value = item.desc;
+        document.getElementById('inSteps').value = plainSteps;
+        
+        editingId = id;
+        document.getElementById('formTitle').innerText = "Edit & Repolish";
+        document.getElementById('submitBtn').innerHTML = '<i class="ph ph-check"></i> Update';
+        document.getElementById('cancelEditBtn').classList.remove('hidden');
+        
+        switchTab('submit');
+    }
+
+    window.cancelEdit = function() {
+        editingId = null;
+        document.getElementById('inTitle').value = '';
+        document.getElementById('inDesc').value = '';
+        document.getElementById('inSteps').value = '';
+        
+        document.getElementById('formTitle').innerText = "Submit a Workaround";
+        document.getElementById('submitBtn').innerHTML = '<i class="ph ph-magic-wand"></i> Polish & Submit';
+        document.getElementById('cancelEditBtn').classList.add('hidden');
+        switchTab('moderate');
     }
 
     window.approve = async (id) => updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', id), { status: "approved" });
     window.reject = async (id) => { if(confirm("Delete this submission?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'workarounds', id)); };
 
-    // ==========================================
-    // 6. PRODUCTION AI INTEGRATION
-    // ==========================================
-    
+    // 7. AI UTILS
     async function callGroq(messages) {
-        // Only use the secure Netlify server function
-        // No client-side simulation or fallback.
         try {
             const response = await fetch("/.netlify/functions/ai", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ messages: messages })
             });
-
-            if (!response.ok) {
-                // Safely read the error message from the server (prevent JSON parse errors on 404/500 pages)
-                const errorText = await response.text();
-                
-                // Specific helpful error for the most common issue (404 in preview)
-                if (response.status === 404) {
-                    throw new Error("Backend function not found (404). This happens if the code isn't deployed to Netlify yet.");
-                }
-                
-                throw new Error(`Server returned ${response.status}: ${errorText.substring(0, 100)}`);
-            }
-            
+            if (!response.ok) throw new Error("AI Server Error");
             const data = await response.json();
-            
-            // Defensive parsing: Strip Markdown code blocks if AI added them
             const content = data.choices?.[0]?.message?.content || "";
-            try {
-                return JSON.parse(content);
-            } catch (jsonError) {
-                // Regex to remove ```json ... ``` wrappers
-                const cleanJson = content.replace(/^```json\s*|```$/g, '').trim();
-                return JSON.parse(cleanJson);
-            }
+            const cleanJson = content.replace(/^```json\s*|```$/g, '').trim();
+            return JSON.parse(cleanJson);
         } catch (e) {
-            console.error("AI Service Connection Error:", e);
-            alert(`AI Service Error: ${e.message}\n\nCheck the console for full details.`);
+            console.error(e);
             return null;
         }
     }
 
-    // Feature A: AI Polish
-    window.aiPolish = async function() {
-        const title = document.getElementById('inTitle').value;
-        const desc = document.getElementById('inDesc').value;
-        const steps = document.getElementById('inSteps').value;
-
-        if(!steps) return alert("Write some rough steps first!");
-
-        const formDiv = document.getElementById('form-content');
-        formDiv.classList.add('ai-processing');
-
-        const prompt = `
-            You are a professional technical writer. 
-            Rewrite the following issue submission to be clear, professional, and free of typos.
-            Format 'steps' as a numbered list.
-            
-            Input:
-            Title: ${title}
-            Description: ${desc}
-            Steps: ${steps}
-
-            Return JSON: { "title": "...", "desc": "...", "steps": "..." }
-        `;
-
-        const result = await callGroq([{ role: "user", content: prompt }]);
-
-        if (result) {
-            document.getElementById('inTitle').value = result.title;
-            document.getElementById('inDesc').value = result.desc;
-            document.getElementById('inSteps').value = result.steps;
-            document.getElementById('inSteps').dataset.polished = 'true';
-        }
-
-        formDiv.classList.remove('ai-processing');
-    }
-
-    // Feature B: Smart Search
     window.handleSearchKeyup = (e) => {
         if(e.key === 'Enter') window.performAISearch();
         else window.renderList();
@@ -454,39 +567,30 @@
         const query = document.getElementById('searchInput').value;
         if(!query) return;
 
-        const btn = document.querySelector('.btn-ai');
+        const btn = document.querySelector('.btn-ai-search');
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Thinking...';
+        btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
         
         const corpus = localWorkarounds
             .filter(i => i.status === 'approved')
             .map(i => ({ id: i.id, title: i.title, desc: i.desc }));
 
         const prompt = `
-            You are a support assistant.
-            User Query: "${query}"
-            
-            Database:
-            ${JSON.stringify(corpus)}
-
-            Return a JSON object with a key "matchIds" containing an array of IDs for the items that best answer the user's query. 
-            If the user is describing symptoms, match them to the correct issue.
-            Return: { "matchIds": ["id1", "id2"] }
+            Match this user query to the database issues.
+            Query: "${query}"
+            Database: ${JSON.stringify(corpus)}
+            Return JSON: { "matchIds": ["id1"] }
         `;
 
         const result = await callGroq([{ role: "user", content: prompt }]);
-        
         if (result && result.matchIds) {
             const aiFilteredList = localWorkarounds.filter(item => result.matchIds.includes(item.id));
             window.renderList(aiFilteredList);
         }
-
         btn.innerHTML = originalText;
     }
 
     initApp();
-
 </script>
-
 </body>
 </html>
